@@ -1,43 +1,49 @@
 import { motion } from 'framer-motion';
-import { Users, MessageSquare, BookOpen, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { userAdminAPI } from '../../lib/api';
 
 const stats = [
   { 
     label: 'Total Users', 
-    value: '156', 
-    change: '+12%', 
-    trend: 'up',
+    value: '—', 
+    change: null, 
+    trend: 'neutral',
     icon: Users, 
     color: 'text-indigo-400',
-    bgColor: 'bg-indigo-500/10'
+    bgColor: 'bg-indigo-500/10',
+    key: 'total'
   },
   { 
-    label: 'New Inquiries', 
-    value: '23', 
-    change: '+8%', 
-    trend: 'up',
-    icon: MessageSquare, 
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/10'
-  },
-  { 
-    label: 'Active Courses', 
-    value: '8', 
-    change: '0%', 
+    label: 'Active Users', 
+    value: '—', 
+    change: null, 
     trend: 'neutral',
-    icon: BookOpen, 
-    color: 'text-yellow-400',
-    bgColor: 'bg-yellow-500/10'
+    icon: Users, 
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/10',
+    key: 'active'
   },
   { 
-    label: 'Enrollments', 
-    value: '89', 
-    change: '-3%', 
-    trend: 'down',
+    label: 'Admins', 
+    value: '—', 
+    change: null, 
+    trend: 'neutral',
+    icon: Users, 
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/10',
+    key: 'admins'
+  },
+  { 
+    label: 'New Users (30d)', 
+    value: '—', 
+    change: null, 
+    trend: 'neutral',
     icon: TrendingUp, 
     color: 'text-pink-400',
-    bgColor: 'bg-pink-500/10'
+    bgColor: 'bg-pink-500/10',
+    key: 'newUsersLast30Days'
   },
 ];
 
@@ -49,6 +55,13 @@ const recentInquiries = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const [statsData, setStatsData] = useState<any | null>(null);
+
+  useEffect(() => {
+    userAdminAPI.stats()
+      .then((res) => setStatsData(res.data.data.stats))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -85,7 +98,7 @@ export default function AdminDashboard() {
                 {stat.trend === 'down' && <ArrowDownRight className="w-4 h-4 ml-1" />}
               </span>
             </div>
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
+            <p className="text-2xl font-bold text-white">{statsData ? statsData[stat.key] : stat.value}</p>
             <p className="text-sm text-gray-400">{stat.label}</p>
           </motion.div>
         ))}

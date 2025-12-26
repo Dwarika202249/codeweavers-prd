@@ -22,13 +22,15 @@ const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 const StudentDashboard = lazy(() => import('../pages/dashboard/StudentDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard'));
 const InquiriesPage = lazy(() => import('../pages/dashboard/InquiriesPage'));
+const MyCoursesPage = lazy(() => import('../pages/dashboard/MyCoursesPage'));
 
 // Placeholder pages for dashboard sections
 const ComingSoonPage = lazy(() => import('../pages/dashboard/ComingSoonPage'));
 const CoursesPage = lazy(() => import('../pages/dashboard/CoursesPage'));
 const InquiryDetailPage = lazy(() => import('../pages/dashboard/InquiryDetailPage'));
 const ProfilePage = lazy(() => import('../pages/dashboard/ProfilePage'));
-
+const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'));
+const AdminAuditsPage = lazy(() => import('../pages/admin/AdminAuditsPage'));
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -99,7 +101,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'courses',
-        element: <LazyPage><ComingSoonPage title="My Courses" /></LazyPage>,
+        element: <LazyPage><MyCoursesPage /></LazyPage>,
+      },
+      {
+        path: 'courses/:id',
+        element: <LazyPage><ComingSoonPage title="Enrollment Details" /></LazyPage>,
       },
       {
         path: 'profile',
@@ -134,10 +140,12 @@ export const router = createBrowserRouter([
       },
       {
         path: 'users',
-        element: <LazyPage><ComingSoonPage title="Users" /></LazyPage>,
+        element: <LazyPage><AdminUsersPage /></LazyPage>,
       },
-      {
-        path: 'courses',
+      {        path: 'audits',
+        element: <LazyPage><AdminAuditsPage /></LazyPage>,
+      },
+      {        path: 'courses',
         element: <LazyPage><CoursesPage /></LazyPage>,
       },
       {

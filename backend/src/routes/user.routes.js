@@ -108,8 +108,24 @@ router.put(
       throw new Error('Cannot change your own role');
     }
 
+    const previousRole = user.role;
     user.role = role;
     await user.save();
+
+    // Record audit
+    try {
+      const Audit = (await import('../models/Audit.model.js')).default;
+      await Audit.create({
+        action: 'user_role_changed',
+        actor: req.user._id,
+        targetType: 'User',
+        targetId: user._id,
+        metadata: { from: previousRole, to: role },
+      });
+    } catch (e) {
+      // Don't block response on audit failure
+      console.error('Failed to write audit log:', e);
+    }
 
     res.json({
       success: true,
@@ -156,8 +172,23 @@ router.put(
       throw new Error('Cannot deactivate your own account');
     }
 
+    const prev = user.isActive;
     user.isActive = isActive;
     await user.save();
+
+    // Audit
+    try {
+      const Audit = (await import('../models/Audit.model.js')).default;
+      await Audit.create({
+        action: 'user_status_changed',
+        actor: req.user._id,
+        targetType: 'User',
+        targetId: user._id,
+        metadata: { from: prev, to: isActive },
+      });
+    } catch (e) {
+      console.error('Failed to write audit log:', e);
+    }
 
     res.json({
       success: true,
@@ -198,6 +229,20 @@ router.delete(
     }
 
     await user.deleteOne();
+
+    // Audit deletion
+    try {
+      const Audit = (await import('../models/Audit.model.js')).default;
+      await Audit.create({
+        action: 'user_deleted',
+        actor: req.user._id,
+        targetType: 'User',
+        targetId: user._id,
+        metadata: { email: user.email },
+      });
+    } catch (e) {
+      console.error('Failed to write audit log:', e);
+    }
 
     res.json({
       success: true,
@@ -241,6 +286,33 @@ router.get(
         },
       },
     });
+  })
+);
+
+
+/**
+ * @route   GET /api/users/audits
+ * @desc    Get audit logs (admin only)
+ * @access  Private/Admin
+ */
+router.get(
+  '/audits',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const { page = 1, limit = 50 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const Audit = (await import('../models/Audit.model.js')).default;
+
+    const [audits, total] = await Promise.all([
+      Audit.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Audit.countDocuments(),
+    ]);
+
+    res.json({ success: true, data: { audits, pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / parseInt(limit)) } } });
   })
 );
 

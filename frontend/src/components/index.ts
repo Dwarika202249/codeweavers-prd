@@ -23,3 +23,4 @@ export { useSEO } from '../hooks/useSEO';
 export { default as ScrollToTop } from './ScrollToTop';
 export { ErrorBoundary, PageErrorBoundary, SectionErrorBoundary } from './ErrorBoundary';
 export { default as ProtectedRoute } from './ProtectedRoute';
+export { default as EnrollCTA } from './EnrollCTA';

@@ -41,6 +41,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
+import enrollmentRoutes from './routes/enrollment.routes.js';
+app.use('/api/enrollments', enrollmentRoutes);
+import exportRoutes from './routes/export.routes.js';
+app.use('/api/export', exportRoutes);
 
 // Error handling
 app.use(notFound);

@@ -205,5 +205,28 @@ export const courseAPI = {
     api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
 };
 
+export const enrollmentAPI = {
+  enroll: (data: { courseId?: string; courseSlug?: string }) =>
+    api.post<{ success: boolean; data: { enrollment: any } }>('/enrollments', data),
+  getMy: () => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments'),
+  getAll: (params?: { page?: number; limit?: number }) => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments', { params }),
+  getById: (id: string) => api.get<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`),
+  update: (id: string, data: any) => api.put<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`, data),
+  remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/enrollments/${id}`),
+};
+// User admin APIs
+export const userAdminAPI = {
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string; isActive?: boolean }) =>
+    api.get<{ success: boolean; data: { users: any[]; pagination?: any } }>('/users', { params }),
+  getById: (id: string) => api.get<{ success: boolean; data: { user: any } }>(`/users/${id}`),
+  updateRole: (id: string, role: 'user' | 'admin') => api.put<{ success: boolean; data: { user: any } }>(`/users/${id}/role`, { role }),
+  updateStatus: (id: string, isActive: boolean) => api.put<{ success: boolean; data: { user: any } }>(`/users/${id}/status`, { isActive }),
+  remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/users/${id}`),
+  stats: () => api.get<{ success: boolean; data: { stats: any } }>(`/users/stats/summary`),
+  // Server-side export (streamed as CSV)
+  exportUsers: (params?: { search?: string; role?: string; isActive?: boolean; from?: string; to?: string; limit?: number }) =>
+    api.get(`/export/users`, { params, responseType: 'blob' }),
+};
+
 // Export the axios instance for custom requests
 export default api;

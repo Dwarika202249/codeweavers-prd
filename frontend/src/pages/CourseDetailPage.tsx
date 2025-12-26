@@ -5,6 +5,7 @@ import { getCourseBySlug } from '../data/courses';
 import { cn } from '../lib/utils';
 import SEO from '../components/SEO';
 import { CoursePageSchema } from '../components/JsonLd';
+import EnrollCTA from '../components/EnrollCTA';
 
 export default function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -245,12 +246,8 @@ export default function CourseDetailPage() {
             <p className="mt-2 text-gray-300">
               Contact me to discuss enrollment and customize the program for your needs.
             </p>
-            <Link
-              to="/contact"
-              className="mt-6 inline-block rounded-lg bg-indigo-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-            >
-              Enroll Now
-            </Link>
+            {/* Enroll button: if logged in, attempt to enroll via API; otherwise link to contact */}
+            <EnrollCTA courseSlug={course.slug} />
           </motion.div>
         </div>
       </div>
