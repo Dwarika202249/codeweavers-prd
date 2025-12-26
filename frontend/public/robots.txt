@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://codeweavers.in/sitemap.xml
+
+# Disallow admin/api paths (if any in future)
+Disallow: /api/
+Disallow: /_*
+
+# Crawl delay (optional, be polite to crawlers)
+Crawl-delay: 1

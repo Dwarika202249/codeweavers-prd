@@ -21,7 +21,7 @@ export default function Section({
         'py-16 md:py-20 lg:py-24',
         background === 'default' && 'bg-gray-950',
         background === 'dark' && 'bg-gray-900',
-        background === 'gradient' && 'bg-gradient-to-br from-gray-900 via-gray-950 to-indigo-950',
+        background === 'gradient' && 'bg-linear-to-br from-gray-900 via-gray-950 to-indigo-950',
         className
       )}
     >

@@ -45,7 +45,7 @@ export default function ExperiencePage() {
                   <ul className="mt-4 space-y-2">
                     {exp.highlights.map((highlight, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
-                        <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
                         {highlight}
                       </li>
                     ))}
@@ -84,7 +84,7 @@ export default function ExperiencePage() {
         </div>
 
         {/* Impact Stats */}
-        <div className="mt-24 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 p-8">
+        <div className="mt-24 rounded-xl border border-indigo-500/30 bg-linear-to-r from-indigo-900/30 to-purple-900/30 p-8">
           <h3 className="text-center text-2xl font-bold text-white">Impact by Numbers</h3>
           <div className="mt-8 grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="text-center">

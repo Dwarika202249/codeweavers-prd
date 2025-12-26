@@ -82,7 +82,7 @@ export default function MethodologyPage() {
                 key={index}
                 className="flex items-start gap-3 rounded-lg border border-gray-800 bg-gray-900 p-4"
               >
-                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-400" />
+                <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-400" />
                 <span className="text-gray-200">{item}</span>
               </div>
             ))}

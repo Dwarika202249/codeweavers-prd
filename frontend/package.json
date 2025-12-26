@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:sitemap": "npx tsx scripts/generate-sitemap.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
