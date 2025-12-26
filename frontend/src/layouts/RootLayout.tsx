@@ -3,11 +3,13 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { SEO } from '../components';
 import ScrollToTop from '../components/ScrollToTop';
+import { Toaster } from '../lib/toast';
 
 export default function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 text-gray-100">
       <ScrollToTop />
+      <Toaster />
       <SEO />
       {/* Skip to content link for accessibility */}
       <a

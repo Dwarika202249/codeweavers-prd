@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { getCourseBySlug } from '../data/courses';
 import { cn } from '../lib/utils';
 import SEO from '../components/SEO';
+import { CoursePageSchema } from '../components/JsonLd';
 
 export default function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -28,6 +29,7 @@ export default function CourseDetailPage() {
         title={course.title}
         description={course.description}
       />
+      <CoursePageSchema course={course} />
       <div className="min-h-screen py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           {/* Back Link */}

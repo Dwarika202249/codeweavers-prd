@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+/* Toast animations */
+@keyframes enter {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes leave {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.animate-enter {
+  animation: enter 0.35s ease-out forwards;
+}
+
+.animate-leave {
+  animation: leave 0.35s ease-in forwards;
+}

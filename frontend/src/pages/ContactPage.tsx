@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send, Mail, Phone, MapPin } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { showError } from '../lib/toast';
+import { sendContactEmail, storeSubmission, type EmailData } from '../lib/emailService';
+import EmailConfirmationModal from '../components/ui/EmailConfirmationModal';
 import { cn } from '../lib/utils';
 
 const contactSchema = z.object({
@@ -26,6 +29,13 @@ const inquiryTypes = [
 ];
 
 export default function ContactPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submissionData, setSubmissionData] = useState<{
+    referenceId: string;
+    emails: EmailData[];
+    userName: string;
+  } | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -36,16 +46,45 @@ export default function ContactPage() {
   });
 
   const onSubmit = async (data: ContactFormData) => {
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log('Form submitted:', data);
-    toast.success('Message sent successfully! I\'ll get back to you soon.');
-    reset();
+    try {
+      const result = await sendContactEmail(data);
+      
+      // Store submission for demo purposes
+      storeSubmission(data, result.referenceId);
+      
+      // Set submission data and open modal
+      setSubmissionData({
+        referenceId: result.referenceId,
+        emails: result.emails,
+        userName: data.name,
+      });
+      setIsModalOpen(true);
+      
+      // Reset form
+      reset();
+    } catch {
+      showError('Failed to send message. Please try again.');
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSubmissionData(null);
   };
 
   return (
     <div className="min-h-screen py-20">
-      <Toaster position="top-right" />
+      {/* Email Confirmation Modal */}
+      {submissionData && (
+        <EmailConfirmationModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          referenceId={submissionData.referenceId}
+          emails={submissionData.emails}
+          userName={submissionData.userName}
+        />
+      )}
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center">

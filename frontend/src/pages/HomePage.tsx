@@ -3,6 +3,7 @@ import { Users, Briefcase, FolderCode, Code, CheckCircle, ArrowRight } from 'luc
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Section, Container, SectionHeader, Button, StatCard, CourseCard, TestimonialCard } from '../components';
+import { HomePageSchema } from '../components/JsonLd';
 import { getFeaturedCourses } from '../data/courses';
 import { stats } from '../data/experience';
 import { testimonials } from '../data/testimonials';
@@ -37,7 +38,9 @@ export default function HomePage() {
   const featuredCourses = getFeaturedCourses();
 
   return (
-    <div>
+    <>
+      <HomePageSchema />
+      <div>
       {/* Hero Section */}
       <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-linear-to-br from-gray-900 via-gray-950 to-indigo-950">
         {/* Background decoration */}
@@ -246,5 +249,6 @@ export default function HomePage() {
         </Container>
       </Section>
     </div>
+    </>
   );
 }
