@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Code2, User, LogOut } from 'lucide-react';
+import { Menu, X, Code2, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { navItems } from '../data/navigation';
 import { cn } from '../lib/utils';
 import { useAuth } from '../hooks/useAuth';
@@ -65,7 +65,13 @@ export default function Navbar() {
           <li className="ml-2 pl-2 border-l border-gray-700">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-300">{user?.name?.split(' ')[0]}</span>
+                <Link
+                  to={user?.role === 'admin' ? '/admin' : '/dashboard'}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                  <span className="hidden lg:inline">{user?.role === 'admin' ? 'Admin' : 'Dashboard'}</span>
+                </Link>
                 <button
                   onClick={logout}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -91,7 +97,7 @@ export default function Navbar() {
           type="button"
           className="inline-flex items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen ? 'true' : 'false'}
+          aria-expanded={isOpen}
           aria-controls="mobile-menu"
           aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
         >
@@ -134,13 +140,23 @@ export default function Navbar() {
             {/* Mobile Auth */}
             <li className="pt-2 mt-2 border-t border-gray-800">
               {isAuthenticated ? (
-                <button
-                  onClick={() => { logout(); closeMenu(); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
-                >
-                  <LogOut className="h-5 w-5" aria-hidden="true" />
-                  Sign Out ({user?.name?.split(' ')[0]})
-                </button>
+                <div className="space-y-1">
+                  <Link
+                    to={user?.role === 'admin' ? '/admin' : '/dashboard'}
+                    onClick={closeMenu}
+                    className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  >
+                    <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+                    {user?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                  </Link>
+                  <button
+                    onClick={() => { logout(); closeMenu(); }}
+                    className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  >
+                    <LogOut className="h-5 w-5" aria-hidden="true" />
+                    Sign Out ({user?.name?.split(' ')[0]})
+                  </button>
+                </div>
               ) : (
                 <Link
                   to="/login"

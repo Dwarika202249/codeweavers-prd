@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import { RootLayout } from '../layouts';
+import { RootLayout, DashboardLayout } from '../layouts';
 import { LazyPage } from '../components/LazyPage';
 
 // Lazy load pages for better performance
@@ -16,6 +16,13 @@ const BlogDetailPage = lazy(() => import('../pages/BlogDetailPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+
+// Dashboard pages
+const StudentDashboard = lazy(() => import('../pages/dashboard/StudentDashboard'));
+const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard'));
+
+// Placeholder pages for dashboard sections
+const ComingSoonPage = lazy(() => import('../pages/dashboard/ComingSoonPage'));
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +76,64 @@ export const router = createBrowserRouter([
       {
         path: '*',
         element: <LazyPage><NotFoundPage /></LazyPage>,
+      },
+    ],
+  },
+  // Student Dashboard Routes
+  {
+    path: '/dashboard',
+    element: <DashboardLayout variant="student" />,
+    children: [
+      {
+        index: true,
+        element: <LazyPage><StudentDashboard /></LazyPage>,
+      },
+      {
+        path: 'courses',
+        element: <LazyPage><ComingSoonPage title="My Courses" /></LazyPage>,
+      },
+      {
+        path: 'profile',
+        element: <LazyPage><ComingSoonPage title="Profile" /></LazyPage>,
+      },
+      {
+        path: 'settings',
+        element: <LazyPage><ComingSoonPage title="Settings" /></LazyPage>,
+      },
+    ],
+  },
+  // Admin Dashboard Routes
+  {
+    path: '/admin',
+    element: <DashboardLayout variant="admin" />,
+    children: [
+      {
+        index: true,
+        element: <LazyPage><AdminDashboard /></LazyPage>,
+      },
+      {
+        path: 'inquiries',
+        element: <LazyPage><ComingSoonPage title="Inquiries" /></LazyPage>,
+      },
+      {
+        path: 'users',
+        element: <LazyPage><ComingSoonPage title="Users" /></LazyPage>,
+      },
+      {
+        path: 'courses',
+        element: <LazyPage><ComingSoonPage title="Manage Courses" /></LazyPage>,
+      },
+      {
+        path: 'blog',
+        element: <LazyPage><ComingSoonPage title="Blog Posts" /></LazyPage>,
+      },
+      {
+        path: 'testimonials',
+        element: <LazyPage><ComingSoonPage title="Testimonials" /></LazyPage>,
+      },
+      {
+        path: 'settings',
+        element: <LazyPage><ComingSoonPage title="Admin Settings" /></LazyPage>,
       },
     ],
   },
