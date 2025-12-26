@@ -63,10 +63,14 @@ export default function AboutPage() {
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
-                <Button size="lg">
+                <a 
+                  href="/Dwarika_Kumar_Resume.txt" 
+                  download="Dwarika_Kumar_Resume.txt"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-8 py-3 text-base font-medium text-white transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+                >
                   <Download className="h-5 w-5" />
                   Download CV
-                </Button>
+                </a>
                 <Link to="/contact">
                   <Button variant="outline" size="lg">
                     Get in Touch
