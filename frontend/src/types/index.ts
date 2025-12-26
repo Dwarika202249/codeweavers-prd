@@ -1,4 +1,11 @@
 // Course/Bootcamp types
+export interface CurriculumModule {
+  week: string;
+  title: string;
+  topics: string[];
+  project?: string;
+}
+
 export interface Course {
   id: string;
   title: string;
@@ -12,6 +19,10 @@ export interface Course {
   prerequisites?: string[];
   featured?: boolean;
   icon?: string;
+  curriculum?: CurriculumModule[];
+  schedule?: string;
+  batchSize?: string;
+  mode?: 'Online' | 'Offline' | 'Hybrid';
 }
 
 // Testimonial types
