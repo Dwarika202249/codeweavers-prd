@@ -109,3 +109,52 @@
   font-size: 1.25rem;
   color: #9ca3af;
 }
+
+/* Accessibility Improvements */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible styles */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+/* Hide focus ring when not using keyboard */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  .border-gray-800 {
+    border-color: #d1d5db;
+  }
+  
+  .text-gray-400 {
+    color: #e5e7eb;
+  }
+}

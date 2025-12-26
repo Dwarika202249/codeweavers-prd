@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Send, Mail, Phone, MapPin } from 'lucide-react';
 import { showError } from '../lib/toastUtils';
 import { sendContactEmail, storeSubmission, type EmailData } from '../lib/emailService';
+import { analytics } from '../lib/analytics';
 import EmailConfirmationModal from '../components/ui/EmailConfirmationModal';
 import { cn } from '../lib/utils';
 
@@ -49,6 +50,9 @@ export default function ContactPage() {
     try {
       const result = await sendContactEmail(data);
       
+      // Track form submission
+      analytics.contactFormSubmit(data.inquiryType);
+      
       // Store submission for demo purposes
       storeSubmission(data, result.referenceId);
       
@@ -63,6 +67,7 @@ export default function ContactPage() {
       // Reset form
       reset();
     } catch {
+      analytics.formError('contact', 'submission_failed');
       showError('Failed to send message. Please try again.');
     }
   };

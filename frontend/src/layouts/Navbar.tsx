@@ -19,10 +19,8 @@ export default function Navbar() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen]);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
+  // Close mobile menu handler
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-gray-950/90 backdrop-blur-sm">
@@ -94,6 +92,7 @@ export default function Navbar() {
                 <li key={item.href}>
                   <Link
                     to={item.href}
+                    onClick={closeMenu}
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
                     'block rounded-lg px-4 py-2 text-base font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',

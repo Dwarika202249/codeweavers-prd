@@ -4,7 +4,15 @@ import { useLocation } from 'react-router-dom';
 interface SEOProps {
   title?: string;
   description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  author?: string;
+  noindex?: boolean;
 }
+
+const BASE_URL = 'https://codeweavers.in';
+const DEFAULT_IMAGE = '/og-image.png';
 
 const defaultMeta = {
   title: 'CodeWeavers | Tech Training & Bootcamps',
@@ -36,6 +44,10 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: 'Contact | CodeWeavers',
     description: 'Get in touch for college training, corporate bootcamps, or individual mentorship. Available for workshops and custom programs.',
   },
+  '/blog': {
+    title: 'Blog & Insights | CodeWeavers',
+    description: 'Thoughts on programming, learning strategies, career development, and the tech industry from trainer Dwarika Kumar.',
+  },
 };
 
 export function useSEO(props?: SEOProps) {
@@ -45,27 +57,68 @@ export function useSEO(props?: SEOProps) {
     const meta = pageMeta[location.pathname] || defaultMeta;
     const title = props?.title || meta.title;
     const description = props?.description || meta.description;
+    const image = props?.image || DEFAULT_IMAGE;
+    const type = props?.type || 'website';
+    const url = `${BASE_URL}${location.pathname}`;
     
     // Update document title
     document.title = title;
     
+    // Helper to update or create meta tags
+    const setMetaTag = (selector: string, attribute: string, value: string) => {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.setAttribute(attribute, value);
+      }
+    };
+    
     // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
+    setMetaTag('meta[name="description"]', 'content', description);
+    
+    // Update canonical URL
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', url);
+    
+    // Update robots if noindex
+    if (props?.noindex) {
+      setMetaTag('meta[name="robots"]', 'content', 'noindex, nofollow');
+    } else {
+      setMetaTag('meta[name="robots"]', 'content', 'index, follow');
     }
     
-    // Update OG tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogTitle) ogTitle.setAttribute('content', title);
-    if (ogDescription) ogDescription.setAttribute('content', description);
+    // Update Open Graph tags
+    setMetaTag('meta[property="og:title"]', 'content', title);
+    setMetaTag('meta[property="og:description"]', 'content', description);
+    setMetaTag('meta[property="og:url"]', 'content', url);
+    setMetaTag('meta[property="og:type"]', 'content', type);
+    setMetaTag('meta[property="og:image"]', 'content', image.startsWith('http') ? image : `${BASE_URL}${image}`);
     
     // Update Twitter tags
-    const twitterTitle = document.querySelector('meta[property="twitter:title"]');
-    const twitterDescription = document.querySelector('meta[property="twitter:description"]');
-    if (twitterTitle) twitterTitle.setAttribute('content', title);
-    if (twitterDescription) twitterDescription.setAttribute('content', description);
+    setMetaTag('meta[property="twitter:title"]', 'content', title);
+    setMetaTag('meta[property="twitter:description"]', 'content', description);
+    setMetaTag('meta[property="twitter:url"]', 'content', url);
+    setMetaTag('meta[property="twitter:image"]', 'content', image.startsWith('http') ? image : `${BASE_URL}${image}`);
     
-  }, [location.pathname, props?.title, props?.description]);
+    // Article-specific tags
+    if (type === 'article' && props?.publishedTime) {
+      let articleTime = document.querySelector('meta[property="article:published_time"]');
+      if (!articleTime) {
+        articleTime = document.createElement('meta');
+        articleTime.setAttribute('property', 'article:published_time');
+        document.head.appendChild(articleTime);
+      }
+      articleTime.setAttribute('content', props.publishedTime);
+      
+      if (props?.author) {
+        let articleAuthor = document.querySelector('meta[property="article:author"]');
+        if (!articleAuthor) {
+          articleAuthor = document.createElement('meta');
+          articleAuthor.setAttribute('property', 'article:author');
+          document.head.appendChild(articleAuthor);
+        }
+        articleAuthor.setAttribute('content', props.author);
+      }
+    }
+    
+  }, [location.pathname, props?.title, props?.description, props?.image, props?.type, props?.publishedTime, props?.author, props?.noindex]);
 }

@@ -5,6 +5,7 @@ import { Section, Container, SectionHeader, Button, SkillTag, TimelineItem } fro
 import { AboutPageSchema } from '../components/JsonLd';
 import { experiences } from '../data/experience';
 import { showInfo } from '../lib/toastUtils';
+import { analytics } from '../lib/analytics';
 import profileImage from '../assets/dk.png';
 
 const skills = {
@@ -75,7 +76,10 @@ export default function AboutPage() {
                 <a 
                   href="/Dwarika_Kumar_Resume.txt" 
                   download="Dwarika_Kumar_Resume.txt"
-                  onClick={() => showInfo('Downloading CV...')}
+                  onClick={() => {
+                    showInfo('Downloading CV...');
+                    analytics.cvDownload();
+                  }}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-8 py-3 text-base font-medium text-white transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                 >
                   <Download className="h-5 w-5" />

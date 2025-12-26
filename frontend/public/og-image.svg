@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="#818cf8" opacity="0.1"/>
+  <circle cx="1100" cy="530" r="250" fill="#6366f1" opacity="0.1"/>
+  
+  <!-- Logo/Icon -->
+  <g transform="translate(100, 180)">
+    <!-- Code brackets -->
+    <g fill="url(#accent)">
+      <path d="M60 80l40-50v20l-28 30 28 30v20l-40-50z"/>
+      <path d="M140 80l-40-50v20l28 30-28 30v20l40-50z"/>
+      <rect x="92" y="25" width="16" height="110" rx="4" transform="rotate(-15 100 80)"/>
+    </g>
+  </g>
+  
+  <!-- Main Title -->
+  <text x="280" y="220" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#ffffff">
+    CodeWeavers
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="280" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#818cf8">
+    Tech Training &amp; Bootcamps
+  </text>
+  
+  <!-- Tagline -->
+  <text x="280" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#9ca3af">
+    Learn Skills That Companies Actually Use
+  </text>
+  
+  <!-- Bottom info -->
+  <text x="280" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#6b7280">
+    Industry-experienced trainer • Project-driven learning • Interview-ready skills
+  </text>
+  
+  <!-- URL -->
+  <text x="280" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#4f46e5">
+    codeweavers.in
+  </text>
+  
+  <!-- Trainer name -->
+  <text x="1000" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#9ca3af" text-anchor="end">
+    by Dwarika Kumar
+  </text>
+</svg>

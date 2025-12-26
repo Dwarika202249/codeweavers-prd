@@ -4,8 +4,12 @@ import Footer from './Footer';
 import { SEO } from '../components';
 import ScrollToTop from '../components/ScrollToTop';
 import { Toaster } from '../lib/toast';
+import { usePageTracking } from '../hooks/usePageTracking';
 
 export default function RootLayout() {
+  // Track page views for analytics
+  usePageTracking();
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 text-gray-100">
       <ScrollToTop />

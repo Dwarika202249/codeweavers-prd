@@ -45,8 +45,12 @@ export default function BlogDetailPage() {
   return (
     <>
       <SEO
-        title={post.title}
+        title={`${post.title} | CodeWeavers Blog`}
         description={post.excerpt}
+        image={post.coverImage}
+        type="article"
+        publishedTime={post.publishedAt}
+        author={post.author}
       />
 
       {/* Hero Section */}
