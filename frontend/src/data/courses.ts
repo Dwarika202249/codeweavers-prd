@@ -1,0 +1,126 @@
+import type { Course } from '../types';
+
+export const courses: Course[] = [
+  {
+    id: '1',
+    title: 'MERN Stack Development',
+    slug: 'mern-stack-development',
+    description: 'Master full-stack web development with MongoDB, Express.js, React, and Node.js. Build production-ready applications from scratch.',
+    duration: '8-12 weeks',
+    difficulty: 'Intermediate',
+    targetAudience: ['College Students', 'Fresh Graduates', 'Career Switchers'],
+    learningOutcomes: [
+      'Build complete web applications from frontend to backend',
+      'Work with RESTful APIs and database design',
+      'Deploy applications to cloud platforms',
+      'Industry-standard code practices and Git workflows',
+    ],
+    topics: ['MongoDB', 'Express.js', 'React.js', 'Node.js', 'REST APIs', 'JWT Authentication', 'Deployment'],
+    prerequisites: ['Basic JavaScript knowledge', 'HTML/CSS fundamentals'],
+    featured: true,
+    icon: 'Layers',
+  },
+  {
+    id: '2',
+    title: 'React + TypeScript Mastery',
+    slug: 'react-typescript-mastery',
+    description: 'Deep dive into React with TypeScript for building scalable, type-safe frontend applications used by top companies.',
+    duration: '6-8 weeks',
+    difficulty: 'Intermediate',
+    targetAudience: ['Frontend Developers', 'React Beginners', 'JavaScript Developers'],
+    learningOutcomes: [
+      'Build type-safe React applications',
+      'Master React hooks and state management',
+      'Implement modern UI patterns with Tailwind CSS',
+      'Write testable and maintainable code',
+    ],
+    topics: ['React 18+', 'TypeScript', 'Tailwind CSS', 'State Management', 'React Router', 'Testing'],
+    prerequisites: ['JavaScript fundamentals', 'Basic React knowledge helpful'],
+    featured: true,
+    icon: 'Code2',
+  },
+  {
+    id: '3',
+    title: 'Node.js & Express Backend',
+    slug: 'nodejs-express-backend',
+    description: 'Learn server-side JavaScript with Node.js and Express. Build robust APIs and understand backend architecture.',
+    duration: '5-6 weeks',
+    difficulty: 'Intermediate',
+    targetAudience: ['Frontend Developers', 'Backend Beginners', 'Full-Stack Aspirants'],
+    learningOutcomes: [
+      'Build RESTful APIs with Express.js',
+      'Implement authentication and authorization',
+      'Work with databases (MongoDB, MySQL)',
+      'Handle errors and security best practices',
+    ],
+    topics: ['Node.js', 'Express.js', 'MongoDB', 'MySQL', 'JWT', 'Error Handling', 'Security'],
+    prerequisites: ['JavaScript fundamentals'],
+    featured: true,
+    icon: 'Server',
+  },
+  {
+    id: '4',
+    title: 'Cloud Basics for Developers',
+    slug: 'cloud-basics-developers',
+    description: 'Understand cloud fundamentals with AWS and Azure. Learn to deploy, scale, and manage applications in the cloud.',
+    duration: '3-4 weeks',
+    difficulty: 'Beginner',
+    targetAudience: ['Developers', 'DevOps Beginners', 'IT Professionals'],
+    learningOutcomes: [
+      'Understand cloud computing concepts',
+      'Deploy applications to AWS/Azure',
+      'Work with cloud storage and databases',
+      'Basic CI/CD pipeline setup',
+    ],
+    topics: ['AWS Fundamentals', 'Azure Basics', 'Deployment', 'S3/Blob Storage', 'Cloud Databases'],
+    prerequisites: ['Basic programming knowledge'],
+    featured: false,
+    icon: 'Cloud',
+  },
+  {
+    id: '5',
+    title: 'Interview Preparation Bootcamp',
+    slug: 'interview-preparation',
+    description: 'Get job-ready with comprehensive interview prep covering DSA, system design basics, and real interview scenarios.',
+    duration: '4-6 weeks',
+    difficulty: 'Advanced',
+    targetAudience: ['Job Seekers', 'Final Year Students', 'Career Changers'],
+    learningOutcomes: [
+      'Solve common coding interview problems',
+      'Understand system design fundamentals',
+      'Master behavioral interview techniques',
+      'Build a strong portfolio and resume',
+    ],
+    topics: ['Data Structures', 'Algorithms', 'System Design', 'HR Round Prep', 'Resume Building'],
+    prerequisites: ['Programming in any language', 'Basic DSA knowledge'],
+    featured: false,
+    icon: 'Target',
+  },
+  {
+    id: '6',
+    title: 'Frontend Fundamentals',
+    slug: 'frontend-fundamentals',
+    description: 'Start your web development journey with HTML, CSS, and JavaScript. Perfect for absolute beginners.',
+    duration: '4-5 weeks',
+    difficulty: 'Beginner',
+    targetAudience: ['Complete Beginners', 'Non-Tech Background', 'Students'],
+    learningOutcomes: [
+      'Build responsive websites from scratch',
+      'Understand core web technologies',
+      'Work with modern CSS and layouts',
+      'Write interactive JavaScript code',
+    ],
+    topics: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design', 'Flexbox/Grid', 'DOM Manipulation'],
+    prerequisites: ['No prior experience needed'],
+    featured: false,
+    icon: 'Layout',
+  },
+];
+
+export const getFeaturedCourses = (): Course[] => {
+  return courses.filter((course) => course.featured);
+};
+
+export const getCourseBySlug = (slug: string): Course | undefined => {
+  return courses.find((course) => course.slug === slug);
+};
