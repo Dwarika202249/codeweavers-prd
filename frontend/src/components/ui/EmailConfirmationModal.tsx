@@ -3,7 +3,7 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@
 import { CheckCircle, X, Mail, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { EmailData } from '../../lib/emailService';
-import { showSuccess } from '../../lib/toast';
+import { showSuccess } from '../../lib/toastUtils';
 
 interface EmailConfirmationModalProps {
   isOpen: boolean;

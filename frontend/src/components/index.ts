@@ -18,5 +18,7 @@ export { BlogCard } from './ui/BlogCard';
 export { OptimizedImage, BlogImage, AvatarImage } from './ui/OptimizedImage';
 
 // Utility Components
-export { default as SEO, useSEO } from './SEO';
+export { default as SEO } from './SEO';
+export { useSEO } from '../hooks/useSEO';
 export { default as ScrollToTop } from './ScrollToTop';
+export { ErrorBoundary, PageErrorBoundary, SectionErrorBoundary } from './ErrorBoundary';

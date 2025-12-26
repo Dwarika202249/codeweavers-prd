@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send, Mail, Phone, MapPin } from 'lucide-react';
-import { showError } from '../lib/toast';
+import { showError } from '../lib/toastUtils';
 import { sendContactEmail, storeSubmission, type EmailData } from '../lib/emailService';
 import EmailConfirmationModal from '../components/ui/EmailConfirmationModal';
 import { cn } from '../lib/utils';

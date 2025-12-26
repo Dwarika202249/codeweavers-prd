@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Section, Container, SectionHeader, Button, SkillTag, TimelineItem } from '../components';
 import { AboutPageSchema } from '../components/JsonLd';
 import { experiences } from '../data/experience';
-import { showInfo } from '../lib/toast';
+import { showInfo } from '../lib/toastUtils';
 import profileImage from '../assets/dk.png';
 
 const skills = {

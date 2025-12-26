@@ -27,8 +27,7 @@ export function OptimizedImage({
   const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (priority) {
-      setIsInView(true);
+    if (priority || isInView) {
       return;
     }
 
@@ -45,12 +44,13 @@ export function OptimizedImage({
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
+    const currentRef = imgRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => observer.disconnect();
-  }, [priority]);
+  }, [priority, isInView]);
 
   return (
     <div

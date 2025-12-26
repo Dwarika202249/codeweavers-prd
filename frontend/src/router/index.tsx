@@ -1,7 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '../layouts';
-import { PageLoader } from '../components';
+import { LazyPage } from '../components/LazyPage';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -13,15 +13,6 @@ const ExperiencePage = lazy(() => import('../pages/ExperiencePage'));
 const ContactPage = lazy(() => import('../pages/ContactPage'));
 const BlogPage = lazy(() => import('../pages/BlogPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
-
-// Wrapper component for lazy loaded pages
-function LazyPage({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      {children}
-    </Suspense>
-  );
-}
 
 export const router = createBrowserRouter([
   {
