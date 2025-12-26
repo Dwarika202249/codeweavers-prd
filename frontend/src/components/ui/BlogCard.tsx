@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import type { BlogPost } from '../../types';
 import Badge from './Badge';
+import { BlogImage } from './OptimizedImage';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -19,10 +20,10 @@ export function BlogCard({ post }: BlogCardProps) {
       {/* Cover Image */}
       {post.coverImage && (
         <Link to={`/blog/${post.slug}`} className="block overflow-hidden">
-          <img
+          <BlogImage
             src={post.coverImage}
             alt={post.title}
-            className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
       )}

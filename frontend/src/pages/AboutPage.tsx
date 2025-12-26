@@ -3,6 +3,7 @@ import { Download, Briefcase, GraduationCap, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Section, Container, SectionHeader, Button, SkillTag, TimelineItem } from '../components';
 import { experiences } from '../data/experience';
+import profileImage from '../assets/dk.png';
 
 const skills = {
   frontend: ['React.js', 'TypeScript', 'JavaScript', 'Redux', 'Tailwind CSS', 'HTML/CSS'],
@@ -31,11 +32,15 @@ export default function AboutPage() {
               className="flex justify-center lg:justify-start"
             >
               <div className="relative">
-                <div className="h-64 w-64 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 p-1 sm:h-80 sm:w-80">
-                  <div className="flex h-full w-full items-center justify-center rounded-xl bg-gray-900 text-8xl">
-                    👨‍💻
-                  </div>
+                <div className="h-64 w-64 rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur-sm sm:h-80 sm:w-80">
+                  <img 
+                    src={profileImage} 
+                    alt="Dwarika Kumar - Tech Trainer & Software Engineer"
+                    className="h-full w-full rounded-xl object-cover ring-1 ring-white/10"
+                  />
                 </div>
+                {/* Glow effect behind image */}
+                <div className="absolute -inset-4 -z-10 rounded-3xl bg-indigo-500/20 blur-2xl" />
                 {/* Decorative elements */}
                 <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-xl border border-indigo-500/30 bg-gray-900/80 p-4 backdrop-blur">
                   <p className="text-2xl font-bold text-indigo-400">3+</p>

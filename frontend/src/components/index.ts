@@ -15,6 +15,7 @@ export { default as Skeleton, SkeletonCard, SkeletonText, SkeletonAvatar, Skelet
 export { default as PageLoader } from './ui/PageLoader';
 export { AnimatedSection, AnimatedList, AnimatedItem, AnimatedCard } from './ui/AnimatedComponents';
 export { BlogCard } from './ui/BlogCard';
+export { OptimizedImage, BlogImage, AvatarImage } from './ui/OptimizedImage';
 
 // Utility Components
 export { default as SEO, useSEO } from './SEO';
