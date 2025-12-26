@@ -18,7 +18,7 @@ export default function StudentDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white"
+        className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white"
       >
         <h1 className="text-2xl font-bold">Welcome back, {user?.name?.split(' ')[0]}! 👋</h1>
         <p className="mt-1 text-indigo-100">Continue your learning journey where you left off.</p>
@@ -66,7 +66,7 @@ export default function StudentDashboard() {
               <h3 className="font-medium text-white">MERN Stack Bootcamp</h3>
               <p className="text-sm text-gray-400">Module 3: React Fundamentals</p>
               <div className="mt-2 w-full bg-gray-600 rounded-full h-2">
-                <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '67%' }} />
+                <div className="bg-indigo-500 h-2 rounded-full w-2/3"></div>
               </div>
             </div>
             <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">

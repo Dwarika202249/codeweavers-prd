@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout, DashboardLayout } from '../layouts';
 import { LazyPage } from '../components/LazyPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -79,10 +80,14 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Student Dashboard Routes
+  // Student Dashboard Routes (Protected)
   {
     path: '/dashboard',
-    element: <DashboardLayout variant="student" />,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout variant="student" />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -102,10 +107,14 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Admin Dashboard Routes
+  // Admin Dashboard Routes (Protected - Admin Only)
   {
     path: '/admin',
-    element: <DashboardLayout variant="admin" />,
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        <DashboardLayout variant="admin" />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,

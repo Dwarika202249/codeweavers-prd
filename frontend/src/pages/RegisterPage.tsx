@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,11 +23,15 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register: registerUser, googleLogin, isAuthenticated, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const { register: registerUser, googleLogin, isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Get the redirect path from location state (set by ProtectedRoute)
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
   const {
     register,
@@ -37,12 +41,20 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
+  // Helper to get redirect destination based on user role
+  const getRedirectPath = useCallback(() => {
+    if (from && from !== '/') {
+      return from;
+    }
+    return user?.role === 'admin' ? '/admin' : '/dashboard';
+  }, [from, user?.role]);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate('/');
+      navigate(getRedirectPath(), { replace: true });
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate, getRedirectPath]);
 
   const onSubmit = async (data: RegisterForm) => {
     setError(null);
@@ -50,7 +62,7 @@ export default function RegisterPage() {
 
     try {
       await registerUser(data.name, data.email, data.password);
-      navigate('/');
+      // Navigation will happen via the useEffect above after auth state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
@@ -65,13 +77,13 @@ export default function RegisterPage() {
 
     try {
       await googleLogin(response.credential);
-      navigate('/');
+      // Navigation will happen via the useEffect above after auth state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google login failed');
     } finally {
       setIsSubmitting(false);
     }
-  }, [googleLogin, navigate]);
+  }, [googleLogin]);
 
   // Initialize Google Sign-In
   useEffect(() => {

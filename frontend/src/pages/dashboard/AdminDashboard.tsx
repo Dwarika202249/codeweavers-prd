@@ -56,7 +56,7 @@ export default function AdminDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-red-600 to-orange-600 rounded-xl p-6 text-white"
+        className="bg-linear-to-r from-red-600 to-orange-600 rounded-xl p-6 text-white"
       >
         <h1 className="text-2xl font-bold">Admin Dashboard 🛠️</h1>
         <p className="mt-1 text-red-100">Welcome back, {user?.name}. Here's what's happening today.</p>
