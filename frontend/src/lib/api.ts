@@ -98,6 +98,37 @@ export interface ContactResponse {
   };
 }
 
+export interface ContactInquiryNote {
+  note: string;
+  addedBy?: string;
+  createdAt?: string;
+}
+
+export interface ContactInquiry {
+  _id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status?: string;
+  referenceId?: string;
+  createdAt: string;
+  adminNotes?: ContactInquiryNote[];
+}
+
+export interface ContactInquiryResponse {
+  success: boolean;
+  data: {
+    contacts: ContactInquiry[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+}
+
 // Auth API
 export const authAPI = {
   register: (data: { name: string; email: string; password: string }) =>
@@ -123,6 +154,55 @@ export const authAPI = {
 export const contactAPI = {
   submit: (data: ContactFormData) =>
     api.post<ContactResponse>('/contact', data),
+  getAll: (params?: { page?: number; limit?: number; status?: string; subject?: string }) =>
+    api.get<ContactInquiryResponse>('/contact', { params }),
+  getById: (id: string) =>
+    api.get<{ success: boolean; data: { contact: ContactInquiry } }>(`/contact/${id}`),
+  updateStatus: (id: string, status: string) =>
+    api.put<{ success: boolean; message?: string; data?: { contact: ContactInquiry } }>(`/contact/${id}/status`, { status }),
+  addNote: (id: string, note: string) =>
+    api.post<{ success: boolean; message?: string; data?: { contact: ContactInquiry } }>(`/contact/${id}/notes`, { note }),
+  remove: (id: string) =>
+    api.delete<{ success: boolean; message: string }>(`/contact/${id}`),
+};
+
+// Course Types & API
+export interface Course {
+  _id: string;
+  title: string;
+  slug: string;
+  shortDescription?: string;
+  description?: string;
+  duration?: string;
+  level?: 'Beginner' | 'Intermediate' | 'Advanced';
+  price?: number;
+  prerequisites?: string[];
+  learningOutcomes?: string[];
+  schedule?: string;
+  published?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CourseListResponse {
+  success: boolean;
+  data: {
+    courses: Course[];
+    pagination: { page: number; limit: number; total: number; pages: number };
+  };
+}
+
+export const courseAPI = {
+  getAll: (params?: { page?: number; limit?: number; q?: string }) =>
+    api.get<CourseListResponse>('/courses', { params }),
+  getById: (id: string) =>
+    api.get<{ success: boolean; data: { course: Course } }>(`/courses/${id}`),
+  create: (data: Partial<Course>) =>
+    api.post<{ success: boolean; data: { course: Course } }>(`/courses`, data),
+  update: (id: string, data: Partial<Course>) =>
+    api.put<{ success: boolean; data: { course: Course } }>(`/courses/${id}`, data),
+  remove: (id: string) =>
+    api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
 };
 
 // Export the axios instance for custom requests

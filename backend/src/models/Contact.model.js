@@ -37,7 +37,7 @@ const contactSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['new', 'in-progress', 'responded', 'closed'],
+      enum: ['new', 'in-progress', 'resolved', 'closed'],
       default: 'new',
     },
     referenceId: {
@@ -45,9 +45,14 @@ const contactSchema = new mongoose.Schema(
       unique: true,
     },
     adminNotes: {
-      type: String,
-      default: null,
+      type: [{
+        note: { type: String, required: true },
+        addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date, default: Date.now },
+      }],
+      default: [],
     },
+
     respondedAt: {
       type: Date,
       default: null,
@@ -77,6 +82,13 @@ contactSchema.pre('validate', function () {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.referenceId = `CW-${timestamp}-${random}`;
+  }
+});
+
+// Ensure adminNotes is always an array on initialization (helps when migrating old docs)
+contactSchema.post('init', function (doc) {
+  if (!Array.isArray(doc.adminNotes)) {
+    doc.adminNotes = [];
   }
 });
 

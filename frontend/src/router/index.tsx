@@ -21,9 +21,13 @@ const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 // Dashboard pages
 const StudentDashboard = lazy(() => import('../pages/dashboard/StudentDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard'));
+const InquiriesPage = lazy(() => import('../pages/dashboard/InquiriesPage'));
 
 // Placeholder pages for dashboard sections
 const ComingSoonPage = lazy(() => import('../pages/dashboard/ComingSoonPage'));
+const CoursesPage = lazy(() => import('../pages/dashboard/CoursesPage'));
+const InquiryDetailPage = lazy(() => import('../pages/dashboard/InquiryDetailPage'));
+const ProfilePage = lazy(() => import('../pages/dashboard/ProfilePage'));
 
 export const router = createBrowserRouter([
   {
@@ -99,7 +103,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'profile',
-        element: <LazyPage><ComingSoonPage title="Profile" /></LazyPage>,
+        element: <LazyPage><ProfilePage /></LazyPage>,
       },
       {
         path: 'settings',
@@ -122,7 +126,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'inquiries',
-        element: <LazyPage><ComingSoonPage title="Inquiries" /></LazyPage>,
+        element: <LazyPage><InquiriesPage /></LazyPage>,
+      },
+      {
+        path: 'inquiries/:id',
+        element: <LazyPage><InquiryDetailPage /></LazyPage>,
       },
       {
         path: 'users',
@@ -130,7 +138,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'courses',
-        element: <LazyPage><ComingSoonPage title="Manage Courses" /></LazyPage>,
+        element: <LazyPage><CoursesPage /></LazyPage>,
       },
       {
         path: 'blog',

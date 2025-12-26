@@ -7,6 +7,7 @@ import connectDB from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import userRoutes from './routes/user.routes.js';
+import courseRoutes from './routes/course.routes.js';
 
 // Import middleware
 import { errorHandler, notFound } from './middleware/error.middleware.js';
@@ -22,8 +23,9 @@ app.use(cors({
   origin: config.frontendUrl,
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Allow larger payloads for profile avatar uploads (data URLs) — 5MB limit
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -38,6 +40,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
 
 // Error handling
 app.use(notFound);

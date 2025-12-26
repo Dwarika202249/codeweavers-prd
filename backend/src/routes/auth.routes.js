@@ -250,7 +250,7 @@ router.put(
   '/profile',
   protect,
   asyncHandler(async (req, res) => {
-    const { name } = req.body;
+    const { name, avatar } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -260,6 +260,28 @@ router.put(
     }
 
     if (name) user.name = name;
+    // Accept avatar as a URL or data URL (base64) and validate basic type
+    if (typeof avatar === 'string' && avatar.trim()) {
+      // Basic validation: must be a URL-like string or data URL
+      if (avatar.startsWith('data:')) {
+        // Validate base64 size roughly
+        const base64 = avatar.split(',')[1] || '';
+        // Calculate approximate bytes from base64 length
+        const padding = (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
+        const sizeInBytes = Math.floor((base64.length * 3) / 4) - padding;
+        const maxBytes = 2 * 1024 * 1024; // 2MB
+        if (sizeInBytes > maxBytes) {
+          res.status(413);
+          throw new Error('Avatar image too large (max 2MB)');
+        }
+        user.avatar = avatar;
+      } else if (/^https?:\/\//i.test(avatar)) {
+        user.avatar = avatar;
+      } else {
+        res.status(400);
+        throw new Error('Invalid avatar format');
+      }
+    }
 
     await user.save();
 
