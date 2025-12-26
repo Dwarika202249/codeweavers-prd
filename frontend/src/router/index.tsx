@@ -13,6 +13,8 @@ const ExperiencePage = lazy(() => import('../pages/ExperiencePage'));
 const ContactPage = lazy(() => import('../pages/ContactPage'));
 const BlogPage = lazy(() => import('../pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('../pages/BlogDetailPage'));
+const LoginPage = lazy(() => import('../pages/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 export const router = createBrowserRouter([
@@ -55,6 +57,14 @@ export const router = createBrowserRouter([
       {
         path: 'contact',
         element: <LazyPage><ContactPage /></LazyPage>,
+      },
+      {
+        path: 'login',
+        element: <LazyPage><LoginPage /></LazyPage>,
+      },
+      {
+        path: 'register',
+        element: <LazyPage><RegisterPage /></LazyPage>,
       },
       {
         path: '*',

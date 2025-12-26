@@ -1,5 +1,7 @@
-// Mock email service for demonstration purposes
-// In production, this would integrate with a real email API like SendGrid, Mailgun, etc.
+// Email service with backend API integration
+// Falls back to mock mode when VITE_API_URL is not set
+
+import { contactAPI } from './api';
 
 export interface EmailData {
   to: string;
@@ -19,10 +21,15 @@ export interface ContactFormPayload {
   message: string;
 }
 
-// Simulated network delay
+// Check if backend API is configured
+const isBackendEnabled = (): boolean => {
+  return !!import.meta.env.VITE_API_URL;
+};
+
+// Simulated network delay for mock mode
 const MOCK_DELAY_MS = 1500;
 
-// Generate a unique reference ID
+// Generate a unique reference ID (for mock mode)
 const generateReferenceId = (): string => {
   const timestamp = Date.now().toString(36);
   const randomPart = Math.random().toString(36).substring(2, 8);
@@ -38,6 +45,17 @@ const getInquiryLabel = (type: string): string => {
     other: 'Other Inquiry',
   };
   return labels[type] || type;
+};
+
+// Map frontend inquiry types to backend subject types
+const mapInquiryToSubject = (inquiryType: string): 'course' | 'project' | 'general' | 'other' => {
+  const mapping: Record<string, 'course' | 'project' | 'general' | 'other'> = {
+    student: 'course',
+    college: 'course',
+    agency: 'project',
+    other: 'general',
+  };
+  return mapping[inquiryType] || 'general';
 };
 
 // Format the email body
@@ -88,17 +106,49 @@ This is an automated response. Please do not reply to this email.
   `.trim();
 };
 
-// Mock send email function
+// Send contact email - uses backend API if configured, otherwise mock
 export async function sendContactEmail(
   data: ContactFormPayload
 ): Promise<{ success: boolean; referenceId: string; emails: EmailData[] }> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  // Use real backend API if configured
+  if (isBackendEnabled()) {
+    const response = await contactAPI.submit({
+      name: data.name,
+      email: data.email,
+      subject: mapInquiryToSubject(data.inquiryType),
+      message: buildMessageWithDetails(data),
+    });
 
-  // Simulate occasional failures (10% chance) - disabled for demo
-  // if (Math.random() < 0.1) {
-  //   throw new Error('Failed to send email. Please try again.');
-  // }
+    const referenceId = response.data.data.referenceId;
+    const timestamp = new Date();
+
+    // Return formatted email data for UI display
+    return {
+      success: true,
+      referenceId,
+      emails: [
+        {
+          to: 'contact@codeweavers.in',
+          from: data.email,
+          subject: `New Inquiry from ${data.name}`,
+          body: 'Email sent via backend API',
+          timestamp,
+          referenceId,
+        },
+        {
+          to: data.email,
+          from: 'contact@codeweavers.in',
+          subject: `Thank you for contacting CodeWeavers! [Ref: ${referenceId}]`,
+          body: 'Confirmation email sent via backend API',
+          timestamp,
+          referenceId,
+        },
+      ],
+    };
+  }
+
+  // Mock mode fallback
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
   const referenceId = generateReferenceId();
   const timestamp = new Date();
@@ -133,6 +183,22 @@ export async function sendContactEmail(
     referenceId,
     emails: [notificationEmail, autoReplyEmail],
   };
+}
+
+// Build message with additional form details
+function buildMessageWithDetails(data: ContactFormPayload): string {
+  let message = data.message;
+  const details: string[] = [];
+  
+  if (data.phone) details.push(`Phone: ${data.phone}`);
+  if (data.organization) details.push(`Organization: ${data.organization}`);
+  details.push(`Inquiry Type: ${getInquiryLabel(data.inquiryType)}`);
+  
+  if (details.length > 0) {
+    message += `\n\n---\nAdditional Details:\n${details.join('\n')}`;
+  }
+  
+  return message;
 }
 
 // Store submitted forms in session storage for demo purposes

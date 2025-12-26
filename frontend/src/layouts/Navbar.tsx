@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Code2 } from 'lucide-react';
+import { Menu, X, Code2, User, LogOut } from 'lucide-react';
 import { navItems } from '../data/navigation';
 import { cn } from '../lib/utils';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Close mobile menu on escape key
   useEffect(() => {
@@ -59,6 +61,29 @@ export default function Navbar() {
               </li>
             );
           })}
+          {/* Auth Buttons */}
+          <li className="ml-2 pl-2 border-l border-gray-700">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-300">{user?.name?.split(' ')[0]}</span>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              >
+                <User className="h-4 w-4" aria-hidden="true" />
+                Sign In
+              </Link>
+            )}
+          </li>
         </ul>
 
         {/* Mobile Menu Button */}
@@ -106,6 +131,27 @@ export default function Navbar() {
                 </li>
               );
             })}
+            {/* Mobile Auth */}
+            <li className="pt-2 mt-2 border-t border-gray-800">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => { logout(); closeMenu(); }}
+                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                >
+                  <LogOut className="h-5 w-5" aria-hidden="true" />
+                  Sign Out ({user?.name?.split(' ')[0]})
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={closeMenu}
+                  className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-indigo-500 transition-colors"
+                >
+                  <User className="h-5 w-5" aria-hidden="true" />
+                  Sign In
+                </Link>
+              )}
+            </li>
           </ul>
         </nav>
       )}
