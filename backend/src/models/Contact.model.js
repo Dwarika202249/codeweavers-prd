@@ -25,10 +25,10 @@ const contactSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
-    inquiryType: {
+    subject: {
       type: String,
-      enum: ['student', 'college', 'agency', 'other'],
-      required: [true, 'Inquiry type is required'],
+      enum: ['course', 'project', 'general', 'other'],
+      required: [true, 'Subject is required'],
     },
     message: {
       type: String,
@@ -43,7 +43,6 @@ const contactSchema = new mongoose.Schema(
     referenceId: {
       type: String,
       unique: true,
-      required: true,
     },
     adminNotes: {
       type: String,
@@ -68,18 +67,17 @@ const contactSchema = new mongoose.Schema(
 // Index for faster queries
 contactSchema.index({ email: 1 });
 contactSchema.index({ status: 1 });
-contactSchema.index({ inquiryType: 1 });
+contactSchema.index({ subject: 1 });
 contactSchema.index({ createdAt: -1 });
 // Note: referenceId index is created by unique: true
 
-// Generate reference ID before saving
-contactSchema.pre('save', function (next) {
+// Generate reference ID before validation
+contactSchema.pre('validate', function () {
   if (!this.referenceId) {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.referenceId = `CW-${timestamp}-${random}`;
   }
-  next();
 });
 
 const Contact = mongoose.model('Contact', contactSchema);

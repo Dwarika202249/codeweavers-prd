@@ -103,31 +103,16 @@ export default function EmailConfirmationModal({
                   </div>
                 </div>
 
-                {/* Email Preview */}
+                {/* Email notification */}
                 {autoReply && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <Mail className="h-4 w-4" />
-                      <span>Confirmation email sent to {autoReply.to}</span>
-                    </div>
-
-                    <div className="mt-3 max-h-48 overflow-y-auto rounded-lg border border-gray-700 bg-gray-800/50 p-4">
-                      <p className="text-sm font-medium text-gray-300">
-                        Subject: {autoReply.subject}
-                      </p>
-                      <pre className="mt-3 whitespace-pre-wrap font-sans text-xs text-gray-400">
-                        {autoReply.body}
-                      </pre>
-                    </div>
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-400">
+                    <Mail className="h-4 w-4 text-green-400" />
+                    <span>A confirmation email has been sent to <strong className="text-gray-300">{autoReply.to}</strong></span>
                   </div>
                 )}
 
-                {/* Demo note */}
-                <p className="mt-4 text-center text-xs text-gray-500">
-                  <span className="rounded bg-yellow-500/20 px-2 py-1 text-yellow-400">
-                    Demo Mode
-                  </span>{' '}
-                  No actual email is sent. In production, this would integrate with an email service.
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  We'll get back to you within 24-48 hours.
                 </p>
 
                 {/* Close button */}
