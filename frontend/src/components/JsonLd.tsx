@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { Course } from '../types';
+
 import {
   trainerSchema,
   organizationSchema,
@@ -51,7 +51,7 @@ export function AboutPageSchema() {
   return <JsonLd data={[trainerSchema, organizationSchema]} />;
 }
 
-export function CoursePageSchema({ course }: { course: Course }) {
+export function CoursePageSchema({ course }: { course: any }) {
   const courseSchema = generateCourseSchema(course);
   const breadcrumbs = generateBreadcrumbSchema([
     { name: 'Home', url: '/' },

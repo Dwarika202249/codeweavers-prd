@@ -1,4 +1,5 @@
-import type { Course } from '../types';
+// course type is coming from different sources (api/lib and ui types) — use loose typing here
+
 
 // Base website info
 const SITE_URL = 'https://codeweavers.in';
@@ -83,7 +84,7 @@ export const websiteSchema = {
 };
 
 // Generate Course schema from course data
-export function generateCourseSchema(course: Course) {
+export function generateCourseSchema(course: any) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
@@ -100,18 +101,18 @@ export function generateCourseSchema(course: Course) {
       name: 'Dwarika Kumar',
     },
     courseMode: course.mode || 'Online',
-    educationalLevel: course.difficulty,
+    educationalLevel: course.difficulty || course.level || 'Beginner',
     timeRequired: course.duration,
-    teaches: course.learningOutcomes,
+    teaches: course.learningOutcomes || [],
     hasCourseInstance: {
       '@type': 'CourseInstance',
       courseMode: course.mode || 'Online',
       instructor: {
         '@type': 'Person',
-        name: 'Dwarika Kumar',
+        name: course.instructor || 'Dwarika Kumar',
       },
     },
-    about: course.topics.map(topic => ({
+    about: (course.topics || []).map((topic: string) => ({
       '@type': 'Thing',
       name: topic,
     })),

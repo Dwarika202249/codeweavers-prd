@@ -12,6 +12,20 @@ const CourseSchema = new mongoose.Schema({
   prerequisites: [{ type: String }],
   learningOutcomes: [{ type: String }],
   schedule: { type: String },
+  coverImage: { type: String },
+  instructor: { type: String },
+  tags: [{ type: String }],
+  targetAudience: [{ type: String }],
+  topics: [{ type: String }],
+  capacity: { type: Number },
+  curriculum: [
+    {
+      week: { type: String },
+      title: { type: String },
+      topics: [{ type: String }],
+      project: { type: String },
+    },
+  ],
   published: { type: Boolean, default: false },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, {

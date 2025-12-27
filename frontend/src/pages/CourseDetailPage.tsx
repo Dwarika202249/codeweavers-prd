@@ -1,17 +1,31 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, CheckCircle, BookOpen, Calendar, Monitor, FolderCode } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getCourseBySlug } from '../data/courses';
 import { cn } from '../lib/utils';
 import SEO from '../components/SEO';
 import { CoursePageSchema } from '../components/JsonLd';
 import EnrollCTA from '../components/EnrollCTA';
+import { useEffect, useState } from 'react';
+import { courseAPI, type Course } from '../lib/api';
 
 export default function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const course = slug ? getCourseBySlug(slug) : undefined;
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!course) {
+  useEffect(() => {
+    if (!slug) return;
+    setLoading(true);
+    setError(null);
+    courseAPI.getBySlug(slug)
+      .then((res) => setCourse(res.data.data.course))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading…</div>;
+  if (error || !course) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -24,13 +38,17 @@ export default function CourseDetailPage() {
     );
   }
 
+  // derive display values with sensible fallbacks
+  const difficultyLabel = course.level || course.difficulty || '';
+  const modeLabel = course.mode || 'Online';
+
   return (
     <>
       <SEO 
         title={course.title}
         description={course.description}
       />
-      <CoursePageSchema course={course} />
+      <CoursePageSchema course={course as any} />
       <div className="min-h-screen py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           {/* Back Link */}
@@ -52,22 +70,20 @@ export default function CourseDetailPage() {
             <div className="flex flex-wrap items-center gap-3">
               <span className={cn(
                 'rounded-full px-3 py-1 text-sm font-medium',
-                course.difficulty === 'Beginner' && 'bg-green-900/50 text-green-400',
-                course.difficulty === 'Intermediate' && 'bg-yellow-900/50 text-yellow-400',
-                course.difficulty === 'Advanced' && 'bg-red-900/50 text-red-400'
+                difficultyLabel === 'Beginner' && 'bg-green-900/50 text-green-400',
+                difficultyLabel === 'Intermediate' && 'bg-yellow-900/50 text-yellow-400',
+                difficultyLabel === 'Advanced' && 'bg-red-900/50 text-red-400'
               )}>
-                {course.difficulty}
+                {difficultyLabel}
               </span>
               {course.featured && (
                 <span className="rounded-full bg-indigo-900/50 px-3 py-1 text-sm font-medium text-indigo-400">
                   Featured
                 </span>
               )}
-              {course.mode && (
-                <span className="rounded-full bg-gray-800 px-3 py-1 text-sm font-medium text-gray-300">
-                  {course.mode}
-                </span>
-              )}
+              <span className="rounded-full bg-gray-800 px-3 py-1 text-sm font-medium text-gray-300">
+                {modeLabel}
+              </span>
             </div>
             <h1 className="mt-4 text-4xl font-bold text-white">{course.title}</h1>
             <p className="mt-4 text-lg text-gray-300">{course.description}</p>
@@ -123,7 +139,7 @@ export default function CourseDetailPage() {
                 Curriculum Breakdown
               </h2>
               <div className="mt-6 space-y-4">
-                {course.curriculum.map((module, index) => (
+                {course.curriculum?.map((module: any, index: number) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
@@ -140,7 +156,7 @@ export default function CourseDetailPage() {
                           <h3 className="text-lg font-semibold text-white">{module.title}</h3>
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2">
-                          {module.topics.map((topic, topicIndex) => (
+                          {module.topics?.map((topic: any, topicIndex: number) => (
                             <span
                               key={topicIndex}
                               className="rounded-md bg-gray-800 px-2.5 py-1 text-sm text-gray-300"
@@ -164,21 +180,23 @@ export default function CourseDetailPage() {
           )}
 
           {/* Topics */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-12"
-          >
-            <h2 className="text-2xl font-bold text-white">Technologies & Tools</h2>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {course.topics.map((topic) => (
-                <span key={topic} className="rounded-lg bg-gray-800 px-4 py-2 text-gray-200">
-                  {topic}
-                </span>
-              ))}
-            </div>
-          </motion.div>
+          {course.topics && course.topics.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-12"
+            >
+              <h2 className="text-2xl font-bold text-white">Technologies & Tools</h2>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {course.topics.map((topic) => (
+                  <span key={topic} className="rounded-lg bg-gray-800 px-4 py-2 text-gray-200">
+                    {topic}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
         {/* Learning Outcomes */}
           <motion.div 
@@ -189,7 +207,7 @@ export default function CourseDetailPage() {
           >
             <h2 className="text-2xl font-bold text-white">Learning Outcomes</h2>
             <ul className="mt-6 space-y-4">
-              {course.learningOutcomes.map((outcome, index) => (
+              {course.learningOutcomes?.map((outcome, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-400" />
                   <span className="text-gray-300">{outcome}</span>
@@ -219,21 +237,23 @@ export default function CourseDetailPage() {
           )}
 
           {/* Target Audience */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-12"
-          >
-            <h2 className="text-2xl font-bold text-white">Who Is This For?</h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {course.targetAudience.map((audience) => (
-                <span key={audience} className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-gray-200">
-                  {audience}
-                </span>
-              ))}
-            </div>
-          </motion.div>
+          {course.targetAudience && course.targetAudience.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mt-12"
+            >
+              <h2 className="text-2xl font-bold text-white">Who Is This For?</h2>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {course.targetAudience.map((audience) => (
+                  <span key={audience} className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-gray-200">
+                    {audience}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           {/* CTA */}
           <motion.div 

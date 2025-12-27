@@ -175,11 +175,22 @@ export interface Course {
   description?: string;
   duration?: string;
   level?: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty?: string; // legacy alias used in some UI
+  featured?: boolean;
+  mode?: string;
+  batchSize?: string | number;
+  curriculum?: any[];
+  topics?: string[];
+  targetAudience?: string[];
   price?: number;
   prerequisites?: string[];
   learningOutcomes?: string[];
   schedule?: string;
   published?: boolean;
+  coverImage?: string;
+  instructor?: string;
+  tags?: string[];
+  createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -197,6 +208,8 @@ export const courseAPI = {
     api.get<CourseListResponse>('/courses', { params }),
   getById: (id: string) =>
     api.get<{ success: boolean; data: { course: Course } }>(`/courses/${id}`),
+  getBySlug: (slug: string) =>
+    api.get<{ success: boolean; data: { course: Course } }>(`/courses/slug/${slug}`),
   create: (data: Partial<Course>) =>
     api.post<{ success: boolean; data: { course: Course } }>(`/courses`, data),
   update: (id: string, data: Partial<Course>) =>

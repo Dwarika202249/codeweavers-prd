@@ -31,6 +31,7 @@ const InquiryDetailPage = lazy(() => import('../pages/dashboard/InquiryDetailPag
 const ProfilePage = lazy(() => import('../pages/dashboard/ProfilePage'));
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'));
 const AdminAuditsPage = lazy(() => import('../pages/admin/AdminAuditsPage'));
+const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -147,6 +148,14 @@ export const router = createBrowserRouter([
       },
       {        path: 'courses',
         element: <LazyPage><CoursesPage /></LazyPage>,
+      },
+      {
+        path: 'courses/new',
+        element: <LazyPage><AdminCourseForm /></LazyPage>,
+      },
+      {
+        path: 'courses/:id/edit',
+        element: <LazyPage><AdminCourseForm /></LazyPage>,
       },
       {
         path: 'blog',

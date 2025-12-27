@@ -1,21 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { courses } from '../data/courses';
 import { cn } from '../lib/utils';
+import { courseAPI, type Course } from '../lib/api';
 
 type DifficultyFilter = 'All' | 'Beginner' | 'Intermediate' | 'Advanced';
 
 export default function BootcampsPage() {
   const [filter, setFilter] = useState<DifficultyFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesDifficulty = filter === 'All' || course.difficulty === filter;
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.topics.some(topic => topic.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesDifficulty && matchesSearch;
-  });
+  useEffect(() => {
+    setLoading(true);
+    const params: any = { page: 1, limit: 100, published: true };
+    if (searchQuery) params.q = searchQuery;
+    if (filter && filter !== 'All') params.level = filter;
+    courseAPI.getAll(params)
+      .then((res) => setCourses(res.data.data.courses))
+      .catch(() => setCourses([]))
+      .finally(() => setLoading(false));
+  }, [searchQuery, filter]);
 
   const difficulties: DifficultyFilter[] = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
@@ -62,20 +67,22 @@ export default function BootcampsPage() {
 
         {/* Course Grid */}
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredCourses.map((course) => (
+          {loading ? (
+            <div className="text-gray-400">Loading courses...</div>
+          ) : courses.map((course) => (
             <div
-              key={course.id}
+              key={course._id}
               className="group rounded-xl border border-gray-800 bg-gray-900 p-6 transition-all hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10"
             >
               {/* Header */}
               <div className="flex items-start justify-between">
                 <span className={cn(
                   'rounded-full px-3 py-1 text-xs font-medium',
-                  course.difficulty === 'Beginner' && 'bg-green-900/50 text-green-400',
-                  course.difficulty === 'Intermediate' && 'bg-yellow-900/50 text-yellow-400',
-                  course.difficulty === 'Advanced' && 'bg-red-900/50 text-red-400'
+                  course.level === 'Beginner' && 'bg-green-900/50 text-green-400',
+                  course.level === 'Intermediate' && 'bg-yellow-900/50 text-yellow-400',
+                  course.level === 'Advanced' && 'bg-red-900/50 text-red-400'
                 )}>
-                  {course.difficulty}
+                  {course.level}
                 </span>
                 <span className="text-sm text-gray-500">{course.duration}</span>
               </div>
@@ -85,19 +92,19 @@ export default function BootcampsPage() {
                 {course.title}
               </h3>
               <p className="mt-2 text-sm text-gray-400 line-clamp-2">
-                {course.description}
+                {course.description || course.shortDescription}
               </p>
 
-              {/* Topics */}
+              {/* Technologies (topics) */}
               <div className="mt-4 flex flex-wrap gap-2">
-                {course.topics.slice(0, 4).map((topic) => (
+                {((course.topics && course.topics.length > 0 ? course.topics : (course.learningOutcomes || []))).slice(0, 4).map((topic) => (
                   <span key={topic} className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-300">
                     {topic}
                   </span>
                 ))}
-                {course.topics.length > 4 && (
+                {((course.topics && course.topics.length > 0 ? course.topics : (course.learningOutcomes || []))).length > 4 && (
                   <span className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-500">
-                    +{course.topics.length - 4} more
+                    +{((course.topics && course.topics.length > 0 ? course.topics : (course.learningOutcomes || []))).length - 4} more
                   </span>
                 )}
               </div>
@@ -111,13 +118,13 @@ export default function BootcampsPage() {
               </Link>
             </div>
           ))}
-        </div>
 
-        {filteredCourses.length === 0 && (
+        {(!loading && courses.length === 0) && (
           <div className="mt-12 text-center text-gray-500">
             No courses found matching your criteria.
           </div>
         )}
+        </div>
       </div>
     </div>
   );
