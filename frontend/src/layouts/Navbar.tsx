@@ -97,7 +97,6 @@ export default function Navbar() {
           type="button"
           className="inline-flex items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
           aria-controls="mobile-menu"
           aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
         >

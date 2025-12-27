@@ -25,7 +25,7 @@ const InquiriesPage = lazy(() => import('../pages/dashboard/InquiriesPage'));
 const MyCoursesPage = lazy(() => import('../pages/dashboard/MyCoursesPage'));
 
 // Placeholder pages for dashboard sections
-const ComingSoonPage = lazy(() => import('../pages/dashboard/ComingSoonPage'));
+const ComingSoonPage = lazy(() => import('../pages/dashboard').then(m => ({ default: m.ComingSoonPage })));
 const CoursesPage = lazy(() => import('../pages/dashboard/CoursesPage'));
 const InquiryDetailPage = lazy(() => import('../pages/dashboard/InquiryDetailPage'));
 const ProfilePage = lazy(() => import('../pages/dashboard/ProfilePage'));

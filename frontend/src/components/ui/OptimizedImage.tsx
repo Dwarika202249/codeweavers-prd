@@ -52,11 +52,12 @@ export function OptimizedImage({
     return () => observer.disconnect();
   }, [priority, isInView]);
 
+  const sizeClasses = `${width ? `w-[${width}px]` : ''} ${height ? `h-[${height}px]` : ''}`.trim();
+
   return (
     <div
       ref={imgRef}
-      className={cn('relative overflow-hidden', containerClassName)}
-      style={{ width, height }}
+      className={cn('relative overflow-hidden', containerClassName, sizeClasses)}
     >
       {/* Skeleton/Placeholder */}
       {!isLoaded && (
