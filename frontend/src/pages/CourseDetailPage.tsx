@@ -297,44 +297,7 @@ export default function CourseDetailPage() {
             </aside>
           </div>
 
-          {/* Prerequisites */}
-          {course.prerequisites && course.prerequisites.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="mt-12"
-            >
-              <h2 className="text-2xl font-bold text-white">Prerequisites</h2>
-              <ul className="mt-6 space-y-2">
-                {course.prerequisites.map((prereq, index) => (
-                  <li key={index} className="flex items-center gap-2 text-gray-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                    {prereq}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
 
-          {/* Target Audience */}
-          {course.targetAudience && course.targetAudience.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mt-12"
-            >
-              <h2 className="text-2xl font-bold text-white">Who Is This For?</h2>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {course.targetAudience.map((audience) => (
-                  <span key={audience} className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-gray-200">
-                    {audience}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          )}
 
           {/* CTA */}
           <motion.div 
