@@ -4,9 +4,11 @@ import type { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Section, Container, SectionHeader, Button, StatCard, CourseCard, TestimonialCard } from '../components';
 import { HomePageSchema } from '../components/JsonLd';
-import { getFeaturedCourses } from '../data/courses';
 import { stats } from '../data/experience';
 import { testimonials } from '../data/testimonials';
+import { useEffect, useState } from 'react';
+import { courseAPI } from '../lib/api';
+import type { Course as UiCourse } from '../types';
 
 const iconMap: Record<string, LucideIcon> = {
   Users,
@@ -35,7 +37,45 @@ const whyChooseReasons = [
 ];
 
 export default function HomePage() {
-  const featuredCourses = getFeaturedCourses();
+  const [featuredCourses, setFeaturedCourses] = useState<UiCourse[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoadingFeatured(true);
+    (async () => {
+      try {
+        // pass extra filters via any to keep types simple
+        const res = await courseAPI.getAll({ page: 1, limit: 6, featured: true } as any);
+        if (!mounted) return;
+        const courses: UiCourse[] = (res.data.data.courses || []).map((c: any) => ({
+          id: c._id || c.id,
+          title: c.title,
+          slug: c.slug,
+          description: c.description || c.shortDescription || '',
+          duration: c.duration || '',
+          difficulty: (c.level || c.difficulty || 'Beginner') as UiCourse['difficulty'],
+          targetAudience: c.targetAudience || [],
+          learningOutcomes: c.learningOutcomes || [],
+          topics: c.topics || c.learningOutcomes || [],
+          prerequisites: c.prerequisites || [],
+          featured: Boolean(c.featured),
+          icon: c.icon,
+          curriculum: c.curriculum || [],
+          schedule: c.schedule || '',
+          batchSize: c.batchSize || '',
+          mode: c.mode || undefined,
+        }));
+        setFeaturedCourses(courses);
+      } catch (err) {
+        if (!mounted) return;
+        setFeaturedCourses([]);
+      } finally {
+        if (mounted) setLoadingFeatured(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <>
@@ -165,7 +205,9 @@ export default function HomePage() {
           />
           
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featuredCourses.map((course, index) => (
+            {loadingFeatured ? (
+              <div className="col-span-3 text-center text-gray-400">Loading featured bootcamps...</div>
+            ) : (featuredCourses.map((course, index) => (
               <motion.div
                 key={course.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -175,7 +217,7 @@ export default function HomePage() {
               >
                 <CourseCard course={course} />
               </motion.div>
-            ))}
+            ))) }
           </div>
 
           <div className="mt-12 text-center">
