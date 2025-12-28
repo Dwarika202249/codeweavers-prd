@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { userAdminAPI } from '../../lib/api';
+import { userAdminAPI, contactAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
 
 const stats = [
@@ -48,16 +48,34 @@ const stats = [
   },
 ];
 
-const recentInquiries = [
-  { id: 1, name: 'Rahul Sharma', email: 'rahul@example.com', subject: 'Course Inquiry', time: '2 hours ago' },
-  { id: 2, name: 'Priya Patel', email: 'priya@example.com', subject: 'Collaboration', time: '5 hours ago' },
-  { id: 3, name: 'Amit Kumar', email: 'amit@example.com', subject: 'General Question', time: '1 day ago' },
-];
+const RECENT_LIMIT = 3;
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [statsData, setStatsData] = useState<any | null>(null);
   const [pageTitle, setPageTitle] = useState('Admin Dashboard');
+  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
+
+  // Helper to display relative time (e.g., "2 hours ago")
+  const timeAgo = (input?: string | number | Date) => {
+    if (!input) return '';
+    const then = new Date(input).getTime();
+    if (Number.isNaN(then)) return '';
+    const diff = Date.now() - then;
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 10) return 'just now';
+    if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'} ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+    const years = Math.floor(months / 12);
+    return `${years} year${years === 1 ? '' : 's'} ago`;
+  };
 
   useEffect(() => {
     if (statsData && typeof statsData.total === 'number') {
@@ -69,6 +87,21 @@ export default function AdminDashboard() {
     userAdminAPI.stats()
       .then((res) => setStatsData(res.data.data.stats))
       .catch(() => {});
+
+    // Fetch recent inquiries
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await contactAPI.getAll({ page: 1, limit: RECENT_LIMIT });
+        if (!mounted) return;
+        setRecentInquiries(res.data.data.contacts || []);
+      } catch (err) {
+        // ignore errors - show nothing
+        console.warn('Failed to fetch recent inquiries', err);
+      }
+    })();
+
+    return () => { mounted = false; };
   }, []);
 
   return (
@@ -128,7 +161,7 @@ export default function AdminDashboard() {
         </div>
         <div className="divide-y divide-gray-700">
           {recentInquiries.map((inquiry) => (
-            <div key={inquiry.id} className="p-4 flex items-center justify-between hover:bg-gray-700/50 transition-colors">
+            <div key={inquiry._id || inquiry.id} className="p-4 flex items-center justify-between hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold">
                   {inquiry.name.charAt(0)}
@@ -140,7 +173,7 @@ export default function AdminDashboard() {
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-300">{inquiry.subject}</p>
-                <p className="text-xs text-gray-500">{inquiry.time}</p>
+                <p className="text-xs text-gray-500">{timeAgo(inquiry.createdAt || inquiry.time)}</p>
               </div>
             </div>
           ))}

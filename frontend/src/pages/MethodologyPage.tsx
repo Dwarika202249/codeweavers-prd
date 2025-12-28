@@ -17,7 +17,7 @@ const methodologySteps = [
   {
     step: 3,
     title: 'Debug',
-    description: 'Break things, fix them, and understand how real-world debugging works.',
+    description: 'Break things, fix them, and understand how real-world debugging works in the industries.',
     icon: '🔍',
   },
 ];
