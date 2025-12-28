@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { contactAPI } from '../../lib/api';
 import type { ContactInquiry } from '../../lib/api';
 import { motion } from 'framer-motion';
-import { MessageSquare, Loader2 } from 'lucide-react';
+import { MessageSquare, Loader2, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 
 export default function InquiriesPage() {
@@ -58,12 +59,13 @@ export default function InquiriesPage() {
                 <th className="px-4 py-3 text-left text-gray-400">Message</th>
                 <th className="px-4 py-3 text-left text-gray-400">Date</th>
                 <th className="px-4 py-3 text-left text-gray-400">Ref ID</th>
+                <th className="px-4 py-3 text-left text-gray-400">View</th>
               </tr>
             </thead>
             <tbody>
               {inquiries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-400">No inquiries found.</td>
+                  <td colSpan={7} className="text-center py-8 text-gray-400">No inquiries found.</td>
                 </tr>
               ) : (
                 inquiries.map((inq) => (
@@ -74,6 +76,11 @@ export default function InquiriesPage() {
                     <td className="px-4 py-3 text-gray-400 max-w-xs truncate">{inq.message}</td>
                     <td className="px-4 py-3 text-gray-400">{new Date(inq.createdAt).toLocaleString()}</td>
                     <td className="px-4 py-3 text-gray-500">{inq.referenceId || '-'}</td>
+                    <td className="px-4 py-3 text-gray-400">
+                      <Link to={`/admin/inquiries/${inq._id}`} aria-label={`View inquiry ${inq.name}`} className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300">
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                    </td>
                   </tr>
                 ))
               )}
