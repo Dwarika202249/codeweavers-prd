@@ -13,6 +13,7 @@ export default function InquiriesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageTitle, setPageTitle] = useState('Contact Inquiries');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'in-progress' | 'resolved' | 'closed'>('all');
 
   useEffect(() => {
     setPageTitle(inquiries.length > 0 ? `${inquiries.length} Inquiries` : 'Contact Inquiries');
@@ -20,7 +21,9 @@ export default function InquiriesPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    contactAPI.getAll({ page, limit: 20 })
+    const params: any = { page, limit: 20 };
+    if (statusFilter && statusFilter !== 'all') params.status = statusFilter;
+    contactAPI.getAll(params)
       .then((res) => {
         setInquiries(res.data.data.contacts);
         setTotalPages(res.data.data.pagination.pages);
@@ -29,7 +32,10 @@ export default function InquiriesPage() {
         setError(err.message || 'Failed to fetch inquiries');
       })
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [page, statusFilter]);
+
+  // Reset to first page when filter changes
+  useEffect(() => { setPage(1); }, [statusFilter]);
 
   return (
     <motion.div
@@ -38,9 +44,27 @@ export default function InquiriesPage() {
       className="space-y-6"
     >
       <SEO title={pageTitle} description={`Manage contact inquiries (${inquiries.length})`} />
-      <div className="flex items-center gap-3 mb-4">
-        <MessageSquare className="w-6 h-6 text-indigo-400" />
-        <h1 className="text-xl font-bold text-white">Contact Inquiries</h1>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <MessageSquare className="w-6 h-6 text-indigo-400" />
+          <h1 className="text-xl font-bold text-white">Contact Inquiries</h1>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label htmlFor="statusFilter" className="text-sm text-gray-400">Status</label>
+          <select
+            id="statusFilter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+            className="bg-gray-800 text-sm text-gray-300 rounded px-2 py-1 border border-gray-700"
+          >
+            <option value="all">All</option>
+            <option value="new">New</option>
+            <option value="in-progress">Open</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
       </div>
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -56,9 +80,9 @@ export default function InquiriesPage() {
                 <th className="px-4 py-3 text-left text-gray-400">Name</th>
                 <th className="px-4 py-3 text-left text-gray-400">Email</th>
                 <th className="px-4 py-3 text-left text-gray-400">Subject</th>
+                <th className="px-4 py-3 text-left text-gray-400">Status</th>
                 <th className="px-4 py-3 text-left text-gray-400">Message</th>
                 <th className="px-4 py-3 text-left text-gray-400">Date</th>
-                <th className="px-4 py-3 text-left text-gray-400">Ref ID</th>
                 <th className="px-4 py-3 text-left text-gray-400">View</th>
               </tr>
             </thead>
@@ -73,9 +97,18 @@ export default function InquiriesPage() {
                     <td className="px-4 py-3 text-white font-medium">{inq.name}</td>
                     <td className="px-4 py-3 text-indigo-300">{inq.email}</td>
                     <td className="px-4 py-3 text-gray-300">{inq.subject}</td>
+
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        inq.status === 'resolved' || inq.status === 'closed' ? 'bg-green-800 text-green-300' :
+                        'bg-yellow-900 text-yellow-300'
+                      }`}>
+                        {(inq.status === 'resolved' || inq.status === 'closed') ? 'Resolved' : 'Open'}
+                      </span>
+                    </td>
+
                     <td className="px-4 py-3 text-gray-400 max-w-xs truncate">{inq.message}</td>
                     <td className="px-4 py-3 text-gray-400">{new Date(inq.createdAt).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-gray-500">{inq.referenceId || '-'}</td>
                     <td className="px-4 py-3 text-gray-400">
                       <Link to={`/admin/inquiries/${inq._id}`} aria-label={`View inquiry ${inq.name}`} className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300">
                         <Eye className="w-4 h-4" />
