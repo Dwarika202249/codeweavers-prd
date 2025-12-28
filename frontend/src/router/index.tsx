@@ -29,6 +29,7 @@ const ComingSoonPage = lazy(() => import('../pages/dashboard').then(m => ({ defa
 const CoursesPage = lazy(() => import('../pages/dashboard/CoursesPage'));
 const InquiryDetailPage = lazy(() => import('../pages/dashboard/InquiryDetailPage'));
 const ProfilePage = lazy(() => import('../pages/dashboard/ProfilePage'));
+const UserSettingsPage = lazy(() => import('../pages/dashboard/UserSettingsPage'));
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'));
 const AdminAuditsPage = lazy(() => import('../pages/admin/AdminAuditsPage'));
 const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
@@ -114,7 +115,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'settings',
-        element: <LazyPage><ComingSoonPage title="Settings" /></LazyPage>,
+        element: <LazyPage><UserSettingsPage /></LazyPage>,
       },
     ],
   },

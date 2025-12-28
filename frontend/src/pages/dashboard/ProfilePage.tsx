@@ -1,160 +1,109 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { showSuccess, showError } from '../../lib/toastUtils';
-import { authAPI } from '../../lib/api';
+import { enrollmentAPI } from '../../lib/api';
+import { Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import SEO from '../../components/SEO';
 
-const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  avatar: z.string().optional(),
-});
-
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Please confirm your new password'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
-
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const { user } = useAuth();
   const [pageTitle, setPageTitle] = useState('Profile');
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) setPageTitle(user.name ? `${user.name.split(' ')[0]}'s Profile` : 'Profile');
   }, [user]);
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
-    resolver: zodResolver(profileSchema),
-    defaultValues: { name: user?.name ?? '', avatar: '' },
-  });
-
   useEffect(() => {
-    if (user) setValue('name', user.name);
-  }, [user, setValue]);
+    let mounted = true;
+    setLoading(true);
+    enrollmentAPI.getMy()
+      .then((res) => { if (!mounted) return; setEnrollments(res.data.data.enrollments || []); })
+      .catch(() => { if (!mounted) return; setEnrollments([]); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, []);
 
-  // Convert file to data URL
-  const fileToDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-  const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Limit file size to 2MB
-    if (file.size > 2 * 1024 * 1024) {
-      showError('Image is too large. Please use an image under 2MB.');
-      return;
-    }
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setAvatarPreview(dataUrl);
-      setValue('avatar', dataUrl);
-    } catch (err) {
-      showError('Failed to read image file');
-    }
-  };
-
-  const onSaveProfile = async (data: any) => {
-    setIsSavingProfile(true);
-    try {
-      const payload: any = { name: data.name };
-      if (data.avatar) payload.avatar = data.avatar;
-      const res = await authAPI.updateProfile(payload);
-      const updatedUser = res.data.data.user;
-      updateUser(updatedUser);
-      showSuccess('Profile updated');
-    } catch (err) {
-      showError(err instanceof Error ? err.message : 'Failed to update profile');
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
-
-  const { register: pwRegister, handleSubmit: handlePwSubmit, formState: { errors: pwErrors }, reset: resetPw } = useForm({ resolver: zodResolver(passwordSchema) });
-
-  const onChangePassword = async (data: any) => {
-    setIsChangingPassword(true);
-    try {
-      await authAPI.changePassword({ currentPassword: data.currentPassword, newPassword: data.newPassword });
-      showSuccess('Password changed successfully');
-      resetPw();
-    } catch (err) {
-      showError(err instanceof Error ? err.message : 'Failed to change password');
-    } finally {
-      setIsChangingPassword(false);
-    }
-  };
+  const enrolledCount = enrollments.length;
+  const completedCount = enrollments.filter((e) => e.status === 'completed' || (typeof e.progress !== 'undefined' && e.progress >= 100)).length;
+  const avgProgress = enrollments.length === 0 ? 0 : Math.round(enrollments.reduce((s, e) => s + (Number(e.progress) || 0), 0) / enrollments.length);
 
   return (
     <div className="space-y-6">
-      <SEO title={pageTitle} description="Manage your profile and account settings" />
-      <h1 className="text-xl font-bold text-white">Profile</h1>
+      <SEO title={pageTitle} description="Profile and learning summary" />
 
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 max-w-2xl">
-        <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
-              {avatarPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-gray-400">No avatar</div>
-              )}
-            </div>
-            <div>
-              <label htmlFor="avatar-input" className="block text-sm text-gray-300">Change avatar</label>
-              <input id="avatar-input" aria-label="Upload avatar" type="file" accept="image/*" onChange={onAvatarChange} className="mt-2 text-sm text-gray-200" />
-              <p className="text-xs text-gray-400 mt-1">Max 2MB. Images will be stored as your avatar.</p>
-            </div>
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col md:flex-row items-center gap-6">
+        <div className="w-28 h-28 rounded-xl overflow-hidden bg-gray-700 flex items-center justify-center">
+          {user?.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-gray-400 text-3xl font-semibold">{user?.name?.charAt(0) ?? 'U'}</div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-semibold text-white">{user?.name}</h1>
+          <div className="text-sm text-gray-400 mt-1">{user?.email}</div>
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-300 text-sm">Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-800 text-gray-300 text-sm">{user?.role === 'admin' ? 'Admin' : 'Student'}</span>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Name</label>
-            <input {...register('name')} className="mt-1 block w-full px-4 py-3 rounded-lg bg-gray-900 text-white" />
-            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+        </div>
+        <div className="w-full md:w-auto flex gap-3 justify-end items-center md:flex-nowrap flex-wrap">
+          <div className="bg-gray-900 p-3 rounded-lg text-center min-w-24 flex-1 md:flex-none">
+            <div className="text-sm text-gray-400">Enrolled</div>
+            <div className="text-lg font-semibold text-white">{enrolledCount}</div>
+            <div className="text-xs text-gray-500 mt-1">Courses</div>
           </div>
-
-          <div className="flex gap-2">
-            <button type="submit" disabled={isSavingProfile} className="px-4 py-2 bg-indigo-600 text-white rounded">Save Profile</button>
-            <button type="button" onClick={() => { setAvatarPreview(user?.avatar || null); setValue('avatar', ''); }} className="px-4 py-2 bg-gray-700 text-white rounded">Reset Avatar</button>
+          <div className="bg-gray-900 p-3 rounded-lg text-center min-w-24 flex-1 md:flex-none">
+            <div className="text-sm text-gray-400">Progress</div>
+            <div className="text-lg font-semibold text-white">{avgProgress}%</div>
+            <div className="text-xs text-gray-500 mt-1">Avg completion</div>
           </div>
-        </form>
+          <div className="bg-gray-900 p-3 rounded-lg text-center min-w-24 flex-1 md:flex-none">
+            <div className="text-sm text-gray-400">Certificates</div>
+            <div className="text-lg font-semibold text-white">{completedCount}</div>
+            <div className="text-xs text-gray-500 mt-1">Completed</div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 max-w-2xl">
-        <h2 className="text-lg font-semibold text-white">Change password</h2>
-        <form onSubmit={handlePwSubmit(onChangePassword)} className="space-y-3 mt-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Current password</label>
-            <input {...pwRegister('currentPassword')} type="password" className="mt-1 block w-full px-4 py-3 rounded-lg bg-gray-900 text-white" />
-            {pwErrors.currentPassword && <p className="mt-1 text-sm text-red-600">{pwErrors.currentPassword.message}</p>}
+      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Your Courses</h2>
+          <Link to="/dashboard/courses" className="text-sm text-indigo-400 hover:text-indigo-300">View all</Link>
+        </div>
+
+        {loading ? (
+          <div className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+        ) : enrollments.length === 0 ? (
+          <div className="py-8 text-center text-gray-400">You are not enrolled in any courses yet.</div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {enrollments.slice(0,4).map((e:any) => (
+              <div key={e._id} className="flex items-center gap-4 bg-gray-900 p-3 rounded-lg border border-gray-800">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-white truncate">{e.course?.title || 'Course'}</div>
+                  <div className="text-xs text-gray-400 truncate">{e.course?.shortDescription}</div>
+                </div>
+                <div className="w-48">
+                  <div>
+                    <progress value={Math.min(100, Math.max(0, Number(e.progress) || 0))} max={100} className="w-full h-2 rounded appearance-none" />
+                    <div className="text-xs text-gray-400 mt-2 flex items-center justify-between">
+                      <span>{e.status?.charAt(0)?.toUpperCase() + (e.status?.slice(1) || '')}</span>
+                      <Link to={`/bootcamps/${e.course?.slug}`} className="text-xs text-indigo-400 hover:text-indigo-300">Continue</Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">New password</label>
-            <input {...pwRegister('newPassword')} type="password" className="mt-1 block w-full px-4 py-3 rounded-lg bg-gray-900 text-white" />
-            {pwErrors.newPassword && <p className="mt-1 text-sm text-red-600">{pwErrors.newPassword.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Confirm new password</label>
-            <input {...pwRegister('confirmPassword')} type="password" className="mt-1 block w-full px-4 py-3 rounded-lg bg-gray-900 text-white" />
-            {pwErrors.confirmPassword && <p className="mt-1 text-sm text-red-600">{pwErrors.confirmPassword.message}</p>}
-          </div>
-          <div>
-            <button type="submit" disabled={isChangingPassword} className="px-4 py-2 bg-indigo-600 text-white rounded">Change Password</button>
-          </div>
-        </form>
+        )}
+      </div>
+
+      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+        <p className="text-gray-400">Want to update account details like name or password? Go to <Link to="/dashboard/settings" className="text-indigo-400">Settings</Link>.</p>
       </div>
     </div>
   );

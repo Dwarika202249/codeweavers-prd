@@ -148,6 +148,8 @@ export const authAPI = {
   
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put<{ success: boolean; message: string }>('/auth/password', data),
+  deleteAccount: (data?: { currentPassword?: string }) =>
+    api.delete<{ success: boolean; message: string }>('/auth/account', { data }),
 };
 
 // Contact API

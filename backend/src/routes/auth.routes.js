@@ -4,6 +4,8 @@ import User from '../models/User.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { protect, generateToken } from '../middleware/auth.middleware.js';
 import config from '../config/index.js';
+import Enrollment from '../models/Enrollment.model.js';
+import { sendEmail } from '../services/email.service.js';
 
 const router = express.Router();
 
@@ -350,6 +352,70 @@ router.put(
       success: true,
       message: 'Password changed successfully',
     });
+  })
+);
+
+/**
+ * @route   DELETE /api/auth/account
+ * @desc    Delete current user's account (protected) - requires current password for non-OAuth accounts
+ * @access  Private
+ */
+router.delete(
+  '/account',
+  protect,
+  asyncHandler(async (req, res) => {
+    const { currentPassword } = req.body;
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // If user has a local password, verify it
+    if (user.password) {
+      if (!currentPassword) {
+        res.status(400);
+        throw new Error('Current password is required to delete account');
+      }
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        res.status(401);
+        throw new Error('Current password is incorrect');
+      }
+    }
+
+    // Remove related resources (enrollments)
+    try {
+      await Enrollment.deleteMany({ user: user._id });
+    } catch (err) {
+      // ignore failures but log
+      console.warn('Failed to remove enrollments for user', user._id, err);
+    }
+
+    // Delete user
+    await user.deleteOne();
+
+    // Notify admin and user (best-effort)
+    try {
+      await sendEmail({
+        to: config.adminEmail,
+        subject: `Account deleted: ${user.email}`,
+        html: `<p>User <strong>${user.name}</strong> (${user.email}) has deleted their account.</p>`,
+        text: `User ${user.name} (${user.email}) has deleted their account.`,
+      });
+
+      await sendEmail({
+        to: user.email,
+        subject: 'Your account has been deleted',
+        html: `<p>Hi ${user.name},</p><p>Your account has been deleted successfully. If this was a mistake, contact support at ${config.adminEmail}.</p>`,
+        text: `Hi ${user.name},\n\nYour account has been deleted successfully. If this was a mistake, contact support at ${config.adminEmail}.`,
+      });
+    } catch (err) {
+      console.warn('Failed to send account deletion emails', err);
+    }
+
+    res.json({ success: true, message: 'Account deleted successfully' });
   })
 );
 
