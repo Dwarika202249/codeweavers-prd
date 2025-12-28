@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import api from '../../lib/api';
 import { Loader2 } from 'lucide-react';
+import SEO from '../../components/SEO';
 
 export default function AdminAuditsPage() {
   const [audits, setAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageTitle, setPageTitle] = useState('Audit Logs');
 
+  useEffect(() => {
+    setPageTitle(audits.length > 0 ? `${audits.length} Audit Logs` : 'Audit Logs');
+  }, [audits.length]);
   useEffect(() => {
     setLoading(true);
     api.get('/users/audits')
@@ -16,6 +21,7 @@ export default function AdminAuditsPage() {
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description={`Audit logs (${audits.length})`} />
       <h1 className="text-xl font-bold text-white">Audit Logs</h1>
       {loading ? (
         <div className="py-12 text-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-400" /></div>

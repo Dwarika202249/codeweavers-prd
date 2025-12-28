@@ -48,6 +48,52 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: 'Blog & Insights | CodeWeavers',
     description: 'Thoughts on programming, learning strategies, career development, and the tech industry from trainer Dwarika Kumar.',
   },
+  // Dashboard (Student)
+  '/dashboard': {
+    title: 'Dashboard | CodeWeavers',
+    description: 'Your student dashboard: access enrolled courses, progress, and profile settings.',
+  },
+  '/dashboard/courses': {
+    title: 'My Courses | Dashboard',
+    description: 'View and manage your enrolled courses and progress.',
+  },
+  '/dashboard/profile': {
+    title: 'Profile | Dashboard',
+    description: 'View and edit your profile and account settings.',
+  },
+  '/dashboard/settings': {
+    title: 'Settings | Dashboard',
+    description: 'Configure your account preferences and notification settings.',
+  },
+  // Admin
+  '/admin': {
+    title: 'Admin Panel | CodeWeavers',
+    description: 'Admin dashboard: manage courses, users, and inquiries.',
+  },
+  '/admin/inquiries': {
+    title: 'Inquiries | Admin',
+    description: 'View contact inquiries and administrative notes.',
+  },
+  '/admin/users': {
+    title: 'Users | Admin',
+    description: 'Manage platform users and roles.',
+  },
+  '/admin/courses': {
+    title: 'Courses | Admin',
+    description: 'Create, edit, and publish courses for bootcamps.',
+  },
+  '/admin/blog': {
+    title: 'Blog Posts | Admin',
+    description: 'Manage blog posts, categories, and comments.',
+  },
+  '/admin/testimonials': {
+    title: 'Testimonials | Admin',
+    description: 'Manage student testimonials and endorsements.',
+  },
+  '/admin/settings': {
+    title: 'Settings | Admin',
+    description: 'Platform configuration and admin settings.',
+  },
 };
 
 export function useSEO(props?: SEOProps) {

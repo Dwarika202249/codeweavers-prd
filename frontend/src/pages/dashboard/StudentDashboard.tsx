@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { BookOpen, Clock, Award, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useEffect, useState } from 'react';
+import SEO from '../../components/SEO';
 
 const stats = [
   { label: 'Enrolled Courses', value: '3', icon: BookOpen, color: 'text-indigo-400' },
@@ -11,9 +13,16 @@ const stats = [
 
 export default function StudentDashboard() {
   const { user } = useAuth();
+  const [pageTitle, setPageTitle] = useState('Dashboard');
+
+  useEffect(() => {
+    const name = user?.name?.split(' ')[0];
+    setPageTitle(name ? `${name}’s Dashboard` : 'Dashboard');
+  }, [user]);
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description="Overview of your learning progress and recent activity" />
       {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

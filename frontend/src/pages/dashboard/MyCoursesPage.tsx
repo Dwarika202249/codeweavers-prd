@@ -2,12 +2,18 @@ import { useEffect, useState } from 'react';
 import { enrollmentAPI } from '../../lib/api';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import SEO from '../../components/SEO';
 import '../../styles/progress.css';
 
 export default function MyCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [pageTitle, setPageTitle] = useState('My Courses');
+
+  useEffect(() => {
+    setPageTitle(enrollments.length > 0 ? `${enrollments.length} Courses | My Courses` : 'My Courses');
+  }, [enrollments.length]);
 
   useEffect(() => {
     setLoading(true);
@@ -20,6 +26,7 @@ export default function MyCoursesPage() {
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description={`Your enrolled courses (${enrollments.length})`} />
       <h1 className="text-xl font-bold text-white">My Courses</h1>
 
       {loading ? (

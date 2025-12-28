@@ -29,6 +29,12 @@ export default function InquiryDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (inquiry) {
+      document.title = `Inquiry: ${inquiry.name} | Admin`;
+    }
+  }, [inquiry]);
+
   const handleStatusUpdate = async () => {
     if (!id) return;
     setSaving(true);

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { userAdminAPI } from '../../lib/api';
+import SEO from '../../components/SEO';
 
 const stats = [
   { 
@@ -56,6 +57,13 @@ const recentInquiries = [
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [statsData, setStatsData] = useState<any | null>(null);
+  const [pageTitle, setPageTitle] = useState('Admin Dashboard');
+
+  useEffect(() => {
+    if (statsData && typeof statsData.total === 'number') {
+      setPageTitle(`Admin Dashboard — ${statsData.total} users`);
+    }
+  }, [statsData]);
 
   useEffect(() => {
     userAdminAPI.stats()
@@ -65,6 +73,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description="Admin overview and quick actions" />
       {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

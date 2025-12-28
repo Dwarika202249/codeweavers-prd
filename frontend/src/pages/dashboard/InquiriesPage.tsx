@@ -3,6 +3,7 @@ import { contactAPI } from '../../lib/api';
 import type { ContactInquiry } from '../../lib/api';
 import { motion } from 'framer-motion';
 import { MessageSquare, Loader2 } from 'lucide-react';
+import SEO from '../../components/SEO';
 
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
@@ -10,7 +11,11 @@ export default function InquiriesPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageTitle, setPageTitle] = useState('Contact Inquiries');
 
+  useEffect(() => {
+    setPageTitle(inquiries.length > 0 ? `${inquiries.length} Inquiries` : 'Contact Inquiries');
+  }, [inquiries.length]);
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -31,6 +36,7 @@ export default function InquiriesPage() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      <SEO title={pageTitle} description={`Manage contact inquiries (${inquiries.length})`} />
       <div className="flex items-center gap-3 mb-4">
         <MessageSquare className="w-6 h-6 text-indigo-400" />
         <h1 className="text-xl font-bold text-white">Contact Inquiries</h1>

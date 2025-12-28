@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { courseAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
+import SEO from '../../components/SEO';
 
 export default function AdminCourseForm() {
   const { id } = useParams<{ id?: string }>();
@@ -119,8 +120,11 @@ export default function AdminCourseForm() {
     }
   };
 
+  const seoTitle = id ? (form.title ? `${form.title} | Edit Course` : 'Edit Course') : 'New Course';
+
   return (
     <div className="max-w-3xl">
+      <SEO title={seoTitle} description={form.shortDescription || (id ? 'Edit course details' : 'Create a new course')} />
       <h1 className="text-xl font-bold text-white mb-4">{id ? 'Edit' : 'New'} Course</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

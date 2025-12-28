@@ -3,12 +3,17 @@ import { userAdminAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import { Loader2 } from 'lucide-react';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import SEO from '../../components/SEO';
 
 export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
   const [users, setUsers] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [pageTitle, setPageTitle] = useState('Manage Users');
+
+  useEffect(() => {
+    setPageTitle(users.length > 0 ? `${users.length} Users | Admin` : 'Manage Users');
+  }, [users.length]);  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string | ''>('');
@@ -164,6 +169,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description={`Manage platform users (${users.length})`} />
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Manage Users</h1>
         <div className="flex items-center gap-2">

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import { authAPI } from '../../lib/api';
+import SEO from '../../components/SEO';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -25,6 +26,11 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [pageTitle, setPageTitle] = useState('Profile');
+
+  useEffect(() => {
+    if (user) setPageTitle(user.name ? `${user.name.split(' ')[0]}'s Profile` : 'Profile');
+  }, [user]);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(profileSchema),
@@ -93,6 +99,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
+      <SEO title={pageTitle} description="Manage your profile and account settings" />
       <h1 className="text-xl font-bold text-white">Profile</h1>
 
       <div className="bg-gray-800 rounded-xl p-4 border border-gray-700 max-w-2xl">

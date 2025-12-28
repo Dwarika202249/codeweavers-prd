@@ -4,6 +4,7 @@ import type { Course } from '../../lib/api';
 import { Trash2, Edit, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import SEO from '../../components/SEO';
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -68,6 +69,7 @@ export default function CoursesPage() {
 
   return (
     <div className="space-y-6">
+      <SEO title={`Courses | Admin (${courses.length})`} description="Create, edit and publish courses" />
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Manage Courses</h1>
         <Link to="/admin/courses/new" className="inline-flex items-center gap-2 rounded bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500">
