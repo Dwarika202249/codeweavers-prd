@@ -55,9 +55,12 @@ export default function AdminCourseForm() {
           curriculum: (c.curriculum || []).map((m: any) => ({
             week: m.week || '',
             title: m.title || '',
+            // store a draft string so typing commas/newlines works smoothly
             topics: Array.isArray(m.topics) ? m.topics : (typeof m.topics === 'string' ? m.topics.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+            topicsDraft: Array.isArray(m.topics) ? (m.topics || []).join('\n') : (typeof m.topics === 'string' ? m.topics : ''),
             project: m.project || '',
           })),
+
         });
       })
       .catch((err) => showError(err.message))
@@ -69,7 +72,7 @@ export default function AdminCourseForm() {
   };
 
   const addModule = () => {
-    setForm((prev: any) => ({ ...prev, curriculum: [...(prev.curriculum || []), { week: '', title: '', topics: [], project: '' }] }));
+    setForm((prev: any) => ({ ...prev, curriculum: [...(prev.curriculum || []), { week: '', title: '', topics: [], topicsDraft: '', project: '' }] }));
   };
 
   const removeModule = (index: number) => {
@@ -79,9 +82,34 @@ export default function AdminCourseForm() {
   const updateModule = (index: number, key: string, value: any) => {
     setForm((prev: any) => {
       const curriculum = [...(prev.curriculum || [])];
-      if (!curriculum[index]) curriculum[index] = { week: '', title: '', topics: [], project: '' };
-      if (key === 'topics') curriculum[index][key] = typeof value === 'string' ? value.split(',').map((s: string) => s.trim()).filter(Boolean) : value;
-      else curriculum[index][key] = value;
+      if (!curriculum[index]) curriculum[index] = { week: '', title: '', topics: [], topicsDraft: '', project: '' };
+      if (key === 'topics') {
+        // programmatic set of topics array
+        if (Array.isArray(value)) curriculum[index][key] = value;
+        else if (typeof value === 'string') {
+          curriculum[index][key] = value
+            .split(/\s*(?:,|\n)\s*/)
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+        } else curriculum[index][key] = value;
+      } else if (key === 'topicsDraft') {
+        // keep the draft string while the user types; do not parse until commit/blur
+        curriculum[index].topicsDraft = value;
+      } else curriculum[index][key] = value;
+      return { ...prev, curriculum };
+    });
+  };
+
+  const commitModuleTopics = (index: number) => {
+    setForm((prev: any) => {
+      const curriculum = [...(prev.curriculum || [])];
+      if (!curriculum[index]) return prev;
+      const draft = curriculum[index].topicsDraft ?? '';
+      if (draft) {
+        curriculum[index].topics = draft.split(/\s*(?:,|\n)\s*/).map((s: string) => s.trim()).filter(Boolean);
+      } else if (!Array.isArray(curriculum[index].topics)) {
+        curriculum[index].topics = [];
+      }
       return { ...prev, curriculum };
     });
   };
@@ -97,12 +125,15 @@ export default function AdminCourseForm() {
         tags: form.tags ? form.tags.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
         targetAudience: form.targetAudience ? form.targetAudience.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
         topics: form.topics ? form.topics.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
-        curriculum: (form.curriculum || []).map((m: any) => ({
-          week: m.week || '',
-          title: m.title || '',
-          topics: Array.isArray(m.topics) ? m.topics : (typeof m.topics === 'string' ? m.topics.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
-          project: m.project || '',
-        })),
+        curriculum: (form.curriculum || []).map((m: any) => {
+          const draft = m.topicsDraft ?? '';
+          const topics = Array.isArray(m.topics)
+            ? m.topics
+            : draft
+              ? draft.split(/\s*(?:,|\n)\s*/).map((s: string) => s.trim()).filter(Boolean)
+              : (typeof m.topics === 'string' ? m.topics.split(/\s*(?:,|\n)\s*/).map((s: string) => s.trim()).filter(Boolean) : []);
+          return { week: m.week || '', title: m.title || '', topics, project: m.project || '' };
+        }),
       };
 
       if (id) {
@@ -193,7 +224,27 @@ export default function AdminCourseForm() {
                   <input name={`curriculum-title-${idx}`} value={m.title} onChange={(e) => updateModule(idx, 'title', e.target.value)} placeholder="Module title" className="rounded bg-gray-800 px-2 py-1 text-white col-span-2" />
                 </div>
                 <div>
-                  <textarea name={`curriculum-topics-${idx}`} value={(m.topics || []).join(', ')} onChange={(e) => updateModule(idx, 'topics', e.target.value)} placeholder="Topics (comma separated)" className="w-full rounded bg-gray-800 px-2 py-1 text-white h-20" />
+                  <textarea
+                    name={`curriculum-topics-${idx}`}
+                    value={m.topicsDraft ?? (Array.isArray(m.topics) ? m.topics.join('\n') : (typeof m.topics === 'string' ? m.topics : ''))}
+                    onChange={(e) => updateModule(idx, 'topicsDraft', e.target.value)}
+                    onBlur={() => commitModuleTopics(idx)}
+                    placeholder="Topics (one per line or comma separated)"
+                    className="w-full rounded bg-gray-800 px-2 py-1 text-white h-20"
+                  />
+                  {/* Preview parsed topics */}
+                  {(() => {
+                    const raw = m.topicsDraft ?? (Array.isArray(m.topics) ? m.topics.join('\n') : (typeof m.topics === 'string' ? m.topics : ''));
+                    const parsed = (raw || '').split(/\s*(?:,|\n)\s*/).map((s: string) => s.trim()).filter(Boolean);
+                    if (parsed.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {parsed.map((t: string, i: number) => (
+                          <span key={i} className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200">{t}</span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="flex items-center gap-2">
                   <input name={`curriculum-project-${idx}`} value={m.project} onChange={(e) => updateModule(idx, 'project', e.target.value)} placeholder="Project (optional)" className="rounded bg-gray-800 px-2 py-1 text-white flex-1" />

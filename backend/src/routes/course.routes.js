@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Create course (admin only)
 router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
-  const { title, slug, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, published, targetAudience, topics } = req.body;
+  const { title, slug, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, published, targetAudience, topics, tags } = req.body;
 
   if (!title) {
     res.status(400);
@@ -34,7 +34,9 @@ router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
 
   const topicsClean = Array.isArray(req.body.topics) ? req.body.topics.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.topics === 'string' ? req.body.topics.split(',').map(s => s.trim()).filter(Boolean) : []);
 
-  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, published, createdBy: req.user.id });
+  const tagsClean = Array.isArray(req.body.tags) ? req.body.tags.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.tags === 'string' ? req.body.tags.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
 
   res.status(201).json({ success: true, data: { course } });
 }));
@@ -118,6 +120,11 @@ router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   // allow topics update
   if (typeof req.body.topics !== 'undefined') {
     course.topics = Array.isArray(req.body.topics) ? req.body.topics.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.topics === 'string' ? req.body.topics.split(',').map(s => s.trim()).filter(Boolean) : []);
+  }
+
+  // allow tags update (clean strings)
+  if (typeof req.body.tags !== 'undefined') {
+    course.tags = Array.isArray(req.body.tags) ? req.body.tags.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.tags === 'string' ? req.body.tags.split(',').map(s => s.trim()).filter(Boolean) : []);
   }
 
   // apply other fields

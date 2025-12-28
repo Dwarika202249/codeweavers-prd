@@ -195,19 +195,23 @@ export default function CourseDetailPage() {
                               {module.topics?.map((topic: any, topicIndex: number) => (
                                 <span
                                   key={topicIndex}
-                                  className="rounded-md bg-gray-800 px-2.5 py-1 text-sm text-gray-300"
+                                  className="inline-flex items-center whitespace-nowrap rounded-md bg-gray-800 px-2.5 py-1 text-sm text-gray-300"
                                 >
                                   {topic}
                                 </span>
                               ))}
                             </div>
+
+                            {module.project && (
+                              <div className="mt-4 flex justify-start">
+                                <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-900/20 px-3 py-2">
+                                  <FolderCode className="h-4 w-4 text-green-400" />
+                                  <span className="text-sm font-medium text-green-400">{module.project}</span>
+                                </div>
+                              </div>
+                            )}
+
                           </div>
-                          {module.project && (
-                            <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-900/20 px-3 py-2 sm:shrink-0">
-                              <FolderCode className="h-4 w-4 text-green-400" />
-                              <span className="text-sm font-medium text-green-400">{module.project}</span>
-                            </div>
-                          )}
                         </div>
                       </motion.div>
                     ))}
