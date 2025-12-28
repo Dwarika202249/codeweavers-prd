@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'codeweavers-v1';
+// bump cache name to ensure clients pick up new assets
+const CACHE_NAME = 'codeweavers-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately on install
@@ -12,14 +13,29 @@ const PRECACHE_ASSETS = [
   '/icons/icon-512x512.png',
 ];
 
-// Install event - precache core assets
+// Install event - precache core assets more robustly (avoid cache.addAll failing)
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Precaching core assets');
-      return cache.addAll(PRECACHE_ASSETS);
-    })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    console.log('[SW] Precaching core assets (robust)');
+    // Attempt to fetch each resource and cache only successful responses
+    await Promise.all(
+      PRECACHE_ASSETS.map(async (url) => {
+        try {
+          const response = await fetch(url, { cache: 'no-cache' });
+          if (response && response.ok) {
+            await cache.put(url, response.clone());
+            return { url, ok: true };
+          }
+          console.warn('[SW] Skipping cache for', url, 'status:', response && response.status);
+          return { url, ok: false };
+        } catch (err) {
+          console.warn('[SW] Failed to fetch', url, err);
+          return { url, ok: false };
+        }
+      })
+    );
+  })());
   // Activate immediately
   self.skipWaiting();
 });

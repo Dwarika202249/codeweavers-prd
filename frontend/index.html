@@ -51,14 +51,23 @@
     <script>
       // Register service worker for PWA support
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered:', registration.scope);
-            })
-            .catch((error) => {
-              console.log('SW registration failed:', error);
-            });
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('SW registered:', registration.scope);
+          } catch (error) {
+            console.warn('SW registration failed:', error);
+            // Attempt to unregister any existing service workers to avoid broken older SWs
+            try {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              for (const r of regs) {
+                await r.unregister();
+                console.log('Unregistered old SW:', r.scope);
+              }
+            } catch (unregErr) {
+              console.warn('Failed to unregister old SWs:', unregErr);
+            }
+          }
         });
       }
     </script>
