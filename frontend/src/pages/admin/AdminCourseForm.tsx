@@ -51,6 +51,12 @@ export default function AdminCourseForm() {
           tags: (c.tags || []).join(', '),
           targetAudience: (c.targetAudience || []).join(', '),
           topics: (c.topics || []).join(', '),
+          curriculum: (c.curriculum || []).map((m: any) => ({
+            week: m.week || '',
+            title: m.title || '',
+            topics: Array.isArray(m.topics) ? m.topics : (typeof m.topics === 'string' ? m.topics.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+            project: m.project || '',
+          })),
         });
       })
       .catch((err) => showError(err.message))
