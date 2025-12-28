@@ -20,8 +20,31 @@ export default function CourseDetailPage() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
-    if (status === 'success') {
-      showSuccess('Payment successful — confirming enrollment.');
+    const sessionId = params.get('session_id');
+
+    if (status === 'success' && sessionId) {
+      // Confirm session server-side and attempt to ensure enrollment exists
+      (async () => {
+        try {
+          const res = await (await import('../lib/api')).paymentsAPI.getSession(sessionId);
+          const enrollmentCreated = (res.data?.data as any)?.enrollmentCreated;
+          if (enrollmentCreated) {
+            showSuccess('Payment confirmed and enrollment created.');
+          } else {
+            showSuccess('Payment confirmed. Enrollment may take a moment to appear.');
+          }
+          // Notify payment panel to refresh (it listens for this event)
+          window.dispatchEvent(new Event('enrollment-updated'));
+          // Remove query params from URL to tidy up
+          const url = new URL(window.location.href);
+          url.searchParams.delete('status');
+          url.searchParams.delete('session_id');
+          window.history.replaceState({}, '', url.toString());
+        } catch (err) {
+          console.warn('Failed to confirm session:', err);
+          showSuccess('Payment confirmed; checking enrollment failed. It should appear in a few moments.');
+        }
+      })();
     }
   }, [location.search]);
 

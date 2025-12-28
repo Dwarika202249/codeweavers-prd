@@ -39,6 +39,7 @@ router.post('/create-checkout-session', protect, asyncHandler(async (req, res) =
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
+    locale: 'en',
     line_items: [
       {
         price_data: {
@@ -102,7 +103,27 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 router.get('/session/:id', protect, asyncHandler(async (req, res) => {
   const sessionId = req.params.id;
   const session = await stripe.checkout.sessions.retrieve(sessionId);
-  res.json({ success: true, data: { session } });
+
+  let enrollmentCreated = false;
+
+  if (session && session.payment_status === 'paid') {
+    const metadata = session.metadata || {};
+    const userId = metadata.userId;
+    const courseId = metadata.courseId;
+    if (userId && courseId) {
+      // Only create enrollment if the requesting user matches metadata.userId
+      if (req.user && req.user.id && String(req.user.id) === String(userId)) {
+        const existing = await Enrollment.findOne({ user: userId, course: courseId });
+        if (!existing) {
+          await Enrollment.create({ user: userId, course: courseId, status: 'enrolled' });
+          enrollmentCreated = true;
+          console.log('Enrollment created via session retrieval for user', userId, 'course', courseId);
+        }
+      }
+    }
+  }
+
+  res.json({ success: true, data: { session, enrollmentCreated } });
 }));
 
 export default router;

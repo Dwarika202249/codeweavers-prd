@@ -14,7 +14,7 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
   // Environment
   const isDev = import.meta.env.DEV as boolean;
   useEffect(() => {
-    // On mount, check if authenticated user already has an enrollment for this course
+    // Define check function to allow manual refresh when enrollment updates
     let mounted = true;
     const check = async () => {
       if (!isAuthenticated) return;
@@ -25,14 +25,19 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
         const found = enrollments.some((e: any) => e.course?.slug === courseSlug || e.courseSlug === courseSlug || e.courseId === courseSlug);
         if (mounted) setIsEnrolled(!!found);
       } catch (err) {
-        // ignore errors but log
         console.warn('Failed to fetch enrollments', err);
       } finally {
         if (mounted) setChecking(false);
       }
     };
+
     check();
-    return () => { mounted = false; };
+
+    // Listen for external enrollment updates (e.g., after Stripe redirect/back)
+    const handler = () => { check(); };
+    window.addEventListener('enrollment-updated', handler);
+
+    return () => { mounted = false; window.removeEventListener('enrollment-updated', handler); };
   }, [isAuthenticated, courseSlug]);
   const handleStart = () => {
     // If not authenticated, redirect to login so enrollment can be associated with user
