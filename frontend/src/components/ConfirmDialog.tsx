@@ -7,8 +7,10 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  children?: React.ReactNode;
 }
 
 export default function ConfirmDialog({
@@ -18,8 +20,10 @@ export default function ConfirmDialog({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   loading = false,
+  confirmDisabled = false,
   onConfirm,
   onCancel,
+  children,
 }: ConfirmDialogProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -63,6 +67,8 @@ export default function ConfirmDialog({
         <h2 id="confirm-dialog-title" className="text-lg font-semibold text-white mb-2">{title}</h2>
         <p className="text-sm text-gray-300 mb-4">{message}</p>
 
+        {children && <div className="mb-4">{children}</div>}
+
         <div className="flex justify-end gap-2">
           <button
             type="button"
@@ -74,9 +80,9 @@ export default function ConfirmDialog({
           </button>
           <button
             type="button"
-            className={`px-3 py-2 rounded ${loading ? 'bg-gray-700 text-gray-300' : 'bg-red-600 text-white'}`}
+            className={`px-3 py-2 rounded ${loading || confirmDisabled ? 'bg-gray-700 text-gray-300 opacity-60 cursor-not-allowed' : 'bg-red-600 text-white'}`}
             onClick={onConfirm}
-            disabled={loading}
+            disabled={loading || confirmDisabled}
           >
             {loading ? 'Working...' : confirmText}
           </button>

@@ -7,6 +7,7 @@ import { authAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import { Mail, Bell, Trash, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import SEO from '../../components/SEO';
 
 const profileSchema = z.object({
@@ -31,7 +32,6 @@ export default function UserSettingsPage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isRequestingDelete, setIsRequestingDelete] = useState(false);
 
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [productUpdates, setProductUpdates] = useState(true);
@@ -112,22 +112,35 @@ export default function UserSettingsPage() {
     showSuccess('Preferences saved');
   };
 
-  const requestAccountDeletion = async () => {
-    if (!user) return;
-    const confirmed = window.confirm('This will permanently delete your account and all related data (enrollments). Are you sure you want to proceed?');
-    if (!confirmed) return;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
-    // Ask for current password for security (for non-Google users)
-    const password = window.prompt('Enter your current password to confirm account deletion (leave blank if you use Google sign-in)');
-    setIsRequestingDelete(true);
+  const requestAccountDeletion = () => {
+    if (!user) return;
+    setDeletePassword('');
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  };
+
+  const performAccountDeletion = async () => {
+    // Extra safety: require the admin phrase
+    if (deleteConfirmText !== 'DELETE') {
+      showError('Please type DELETE to confirm account deletion');
+      return;
+    }
+
+    setIsDeleting(true);
     try {
-      await authAPI.deleteAccount({ currentPassword: password || undefined });
+      await authAPI.deleteAccount({ currentPassword: deletePassword || undefined });
       showSuccess('Account deleted. Signing out...');
+      setShowDeleteModal(false);
       logout();
       navigate('/');
     } catch (err: any) {
       showError(err?.response?.data?.message || err?.message || 'Failed to delete account');
-    } finally { setIsRequestingDelete(false); }
+    } finally { setIsDeleting(false); }
   };
 
   return (
@@ -240,11 +253,44 @@ export default function UserSettingsPage() {
         <h2 className="text-lg font-semibold text-white">Danger zone</h2>
         <p className="text-sm text-gray-400 mt-2">If you want to remove your account, request deletion and our team will assist you.</p>
         <div className="mt-3 flex items-center gap-3">
-          <button onClick={requestAccountDeletion} disabled={isRequestingDelete} className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded inline-flex items-center gap-2">
+          <button onClick={requestAccountDeletion} disabled={isDeleting} className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded inline-flex items-center gap-2">
             <Trash className="w-4 h-4" /> Request account deletion
           </button>
         </div>
       </section>
+
+      {/* Delete confirmation modal */}
+      <ConfirmDialog
+        open={showDeleteModal}
+        title="Delete account"
+        message="This will permanently delete your account and all related data (enrollments)."
+        confirmText="Delete account"
+        cancelText="Cancel"
+        loading={isDeleting}
+        confirmDisabled={deleteConfirmText !== 'DELETE'}
+        onConfirm={performAccountDeletion}
+        onCancel={() => setShowDeleteModal(false)}
+      >
+        <div className="text-sm text-gray-300 mb-2">Enter your current password to confirm deletion (leave blank if you use Google sign-in):</div>
+        <input
+          value={deletePassword}
+          onChange={(e) => setDeletePassword(e.target.value)}
+          type="password"
+          placeholder="Current password"
+          className="w-full px-3 py-2 rounded bg-gray-900 border border-gray-800 text-white"
+        />
+        <div className="text-sm text-gray-300 mt-4 mb-2">Type <strong className="text-red-400">DELETE</strong> to confirm permanent deletion:</div>
+        <input
+          value={deleteConfirmText}
+          onChange={(e) => setDeleteConfirmText(e.target.value)}
+          type="text"
+          placeholder="Type DELETE to confirm"
+          className="w-full px-3 py-2 rounded bg-gray-900 border border-gray-800 text-white"
+        />
+        {deleteConfirmText && deleteConfirmText !== 'DELETE' && (
+          <div className="text-xs text-red-400 mt-2">Text does not match. Type DELETE (all caps) to enable deletion.</div>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }
