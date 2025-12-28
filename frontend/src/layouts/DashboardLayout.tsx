@@ -101,9 +101,15 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
         {/* User Info */}
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
+            {user?.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.avatar} alt={user?.name || 'Avatar'} className="w-10 h-10 rounded-full object-cover border border-gray-700" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+            )}
+
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
               <p className="text-xs text-gray-400 truncate">{user?.email}</p>
