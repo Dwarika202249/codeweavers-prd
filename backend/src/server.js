@@ -45,6 +45,8 @@ import enrollmentRoutes from './routes/enrollment.routes.js';
 app.use('/api/enrollments', enrollmentRoutes);
 import exportRoutes from './routes/export.routes.js';
 app.use('/api/export', exportRoutes);
+import paymentRoutes from './routes/payment.routes.js';
+app.use('/api/payments', paymentRoutes);
 
 // Error handling
 app.use(notFound);

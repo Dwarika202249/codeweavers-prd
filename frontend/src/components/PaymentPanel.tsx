@@ -11,7 +11,8 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
   const [showModal, setShowModal] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
   const [checking, setChecking] = useState<boolean>(false);
-
+  // Environment
+  const isDev = import.meta.env.DEV as boolean;
   useEffect(() => {
     // On mount, check if authenticated user already has an enrollment for this course
     let mounted = true;
@@ -40,6 +41,29 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
       return;
     }
     setShowModal(true);
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: window.location.pathname } } });
+      return;
+    }
+
+    setPaying(true);
+    try {
+      const res = await (await import('../lib/api')).paymentsAPI.createCheckoutSession({ courseSlug });
+      const url = res.data?.data?.url;
+      if (url) {
+        // redirect to Stripe Checkout
+        window.location.href = url;
+      } else {
+        showError('Failed to create checkout session');
+      }
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Checkout failed');
+    } finally {
+      setPaying(false);
+    }
   };
 
   const handleMockPay = async () => {
@@ -79,7 +103,7 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
         {shortDescription && (
           <div className="mt-2 text-sm text-gray-300">{shortDescription}</div>
         )}
-        <div className="mt-4 text-sm text-gray-300">Secure payment via Razorpay (mock)</div>
+        <div className="mt-4 text-sm text-gray-300">{isDev ? 'Stripe (test) or Demo payment (dev only)' : 'Stripe (test)'}</div>
         {/* Enroll button variations */}
         {checking ? (
           <div className="mt-6 text-sm text-gray-400">Checking enrollment…</div>
@@ -89,7 +113,12 @@ export default function PaymentPanel({ courseSlug, price = 0, coverImage, shortD
             <Link to="/dashboard/courses" className="w-full text-center rounded border border-gray-700 px-3 py-2 text-sm text-gray-200">View my courses</Link>
           </div>
         ) : (
-          <button onClick={handleStart} className="mt-6 w-full rounded bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-500">Enroll Now</button>
+          <div className="mt-6 flex flex-col gap-2">
+            <button onClick={handleStripeCheckout} disabled={paying} className="w-full rounded bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-500">{paying ? 'Starting checkout…' : 'Pay with Stripe (test)'}</button>
+            {isDev && (
+              <button onClick={handleStart} className="w-full rounded bg-gray-800 px-4 py-2 font-semibold text-gray-200 hover:bg-gray-700">Demo payment (mock) <span className="ml-2 inline-block rounded bg-yellow-600 px-2 py-0.5 text-xs font-medium text-black">dev</span></button>
+            )}
+          </div>
         )}
       </div>
 

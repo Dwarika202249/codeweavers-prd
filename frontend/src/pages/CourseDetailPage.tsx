@@ -6,13 +6,24 @@ import SEO from '../components/SEO';
 import { CoursePageSchema } from '../components/JsonLd';
 import PaymentPanel from '../components/PaymentPanel';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { courseAPI, type Course } from '../lib/api';
+import { showSuccess } from '../lib/toastUtils';
 
 export default function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    if (status === 'success') {
+      showSuccess('Payment successful — confirming enrollment.');
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (!slug) return;

@@ -31,6 +31,10 @@ const config = {
   
   // Frontend
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+
+  // Stripe
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   
   // Admin
   adminEmail: process.env.ADMIN_EMAIL || 'contact@codeweavers.in',

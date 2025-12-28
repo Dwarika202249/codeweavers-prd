@@ -214,8 +214,13 @@ export const courseAPI = {
     api.post<{ success: boolean; data: { course: Course } }>(`/courses`, data),
   update: (id: string, data: Partial<Course>) =>
     api.put<{ success: boolean; data: { course: Course } }>(`/courses/${id}`, data),
-  remove: (id: string) =>
-    api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
+  remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
+};
+
+// Payments API
+export const paymentsAPI = {
+  createCheckoutSession: (data: { courseId?: string; courseSlug?: string }) => api.post<{ success: boolean; data: { url?: string; id?: string } }>(`/payments/create-checkout-session`, data),
+  getSession: (id: string) => api.get<{ success: boolean; data: { session: any } }>(`/payments/session/${id}`),
 };
 
 export const enrollmentAPI = {
