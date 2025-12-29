@@ -3,8 +3,25 @@ import Enrollment from '../models/Enrollment.model.js';
 import Course from '../models/Course.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { protect, adminOnly } from '../middleware/auth.middleware.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+// Multer storage for simple assignment uploads
+const uploadsDir = path.join(process.cwd(), 'uploads', 'enrollments');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+    cb(null, unique);
+  },
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 /**
  * POST /api/enrollments
@@ -86,7 +103,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const enrollment = await Enrollment.findById(req.params.id)
       .populate('user', 'name email')
-      .populate('course', 'title shortDescription slug');
+      .populate('course', 'title shortDescription slug curriculum coverImage instructor');
 
     if (!enrollment) {
       res.status(404);
@@ -122,10 +139,89 @@ router.put(
       throw new Error('Not authorized');
     }
 
-    const { status, progress } = req.body;
+    const { status, progress, completedModules, startDate, endDate, paymentStatus, pricePaid, transactionId, invoiceId } = req.body;
     if (status) enrollment.status = status;
     if (typeof progress !== 'undefined') enrollment.progress = Math.max(0, Math.min(100, Number(progress)));
 
+    if (typeof completedModules !== 'undefined') enrollment.completedModules = Array.isArray(completedModules) ? completedModules : [];
+    if (startDate) enrollment.startDate = new Date(startDate);
+    if (endDate) enrollment.endDate = new Date(endDate);
+
+    if (typeof paymentStatus !== 'undefined') enrollment.paymentStatus = paymentStatus;
+    if (typeof pricePaid !== 'undefined') enrollment.pricePaid = Number(pricePaid);
+    if (typeof transactionId !== 'undefined') enrollment.transactionId = transactionId;
+    if (typeof invoiceId !== 'undefined') enrollment.invoiceId = invoiceId;
+
+    await enrollment.save();
+
+    res.json({ success: true, data: { enrollment } });
+  })
+);
+
+/**
+ * POST /api/enrollments/:id/assignments
+ * upload assignment file (form-data file field = 'file')
+ */
+router.post(
+  '/:id/assignments',
+  protect,
+  upload.single('file'),
+  asyncHandler(async (req, res) => {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      res.status(404);
+      throw new Error('Enrollment not found');
+    }
+
+    if (req.user.role !== 'admin' && enrollment.user.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+
+    if (!req.file) {
+      res.status(400);
+      throw new Error('File is required');
+    }
+
+    const file = req.file;
+    const fileUrl = `/uploads/enrollments/${file.filename}`;
+
+    enrollment.assignments = enrollment.assignments || [];
+    const assignment = {
+      title: req.body.title || file.originalname,
+      fileUrl,
+      filename: file.originalname,
+      uploadedAt: new Date(),
+      notes: req.body.notes || '',
+    };
+
+    enrollment.assignments.push(assignment);
+    await enrollment.save();
+
+    res.status(201).json({ success: true, data: { assignment } });
+  })
+);
+
+/**
+ * POST /api/enrollments/:id/request-refund
+ * mark refund requested (simple placeholder)
+ */
+router.post(
+  '/:id/request-refund',
+  protect,
+  asyncHandler(async (req, res) => {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      res.status(404);
+      throw new Error('Enrollment not found');
+    }
+
+    if (req.user.role !== 'admin' && enrollment.user.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+
+    enrollment.refundRequested = true;
     await enrollment.save();
 
     res.json({ success: true, data: { enrollment } });

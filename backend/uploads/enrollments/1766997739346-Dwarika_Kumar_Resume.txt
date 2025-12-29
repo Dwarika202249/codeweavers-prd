@@ -1,0 +1,85 @@
+DWARIKA KUMAR
+Software Engineer | Tech Trainer | Full-Stack Mentor
+================================================================================
+
+CONTACT
+--------------------------------------------------------------------------------
+Email: contact@codeweavers.in
+Location: India (Remote Training Available)
+Website: codeweavers.in
+
+PROFESSIONAL SUMMARY
+--------------------------------------------------------------------------------
+Industry-experienced Software Engineer with ~3 years at HCLTech, specializing in 
+frontend development and full-stack applications. Passionate educator bridging 
+the gap between academic learning and real-world industry requirements. Proven 
+track record of mentoring 50+ developers from school to professional level.
+
+CORE COMPETENCIES
+--------------------------------------------------------------------------------
+Frontend: React.js, TypeScript, JavaScript ES6+, Redux, Tailwind CSS, HTML5/CSS3
+Backend: Node.js, Express.js, REST APIs, MongoDB, MySQL
+Tools: Git, VS Code, Postman, AWS Basics, Azure Basics
+Soft Skills: Technical Training, Curriculum Design, 1-on-1 Mentorship
+
+PROFESSIONAL EXPERIENCE
+--------------------------------------------------------------------------------
+
+SOFTWARE ENGINEER | HCLTech
+[Current - ~3 Years]
+
+• Develop and maintain enterprise-scale frontend applications using React.js
+• Collaborate with cross-functional teams on full-stack projects
+• Lead code reviews and mentor junior developers
+• Implement best practices for code quality and performance optimization
+
+TECHNICAL TRAINER | Freelance
+[Ongoing]
+
+• Design and deliver bootcamp-style training programs for colleges
+• Create curriculum focused on industry-relevant skills and job readiness
+• Mentor students through hands-on, project-based learning approach
+• Topics: MERN Stack, React + TypeScript, Node.js Backend, Interview Prep
+
+TEACHING & MENTORING EXPERIENCE
+--------------------------------------------------------------------------------
+• Mentored 50+ students from diverse backgrounds
+• Conducted training sessions at multiple colleges and institutions
+• Teaching journey: School students → College juniors → HCLTech team members
+• Philosophy: "Concept → Build → Debug" - Learn by doing, not just watching
+
+BOOTCAMP OFFERINGS
+--------------------------------------------------------------------------------
+1. MERN Stack Development (8-12 weeks)
+2. React + TypeScript Mastery (6-8 weeks)
+3. Node.js & Express Backend (5-6 weeks)
+4. Cloud Basics for Developers (3-4 weeks)
+5. Interview Preparation Bootcamp (4-6 weeks)
+6. Frontend Fundamentals (4-5 weeks)
+
+EDUCATION
+--------------------------------------------------------------------------------
+Bachelor of Technology (B.Tech) in Computer Science
+[University Name] | [Year]
+
+TEACHING PHILOSOPHY
+--------------------------------------------------------------------------------
+I believe in practical, project-driven learning that prepares students for 
+real-world challenges. My approach focuses on:
+
+• Building confidence through hands-on experience
+• Teaching industry-standard practices from day one
+• Preparing students for technical interviews and job success
+• Small batch sizes for personalized attention
+
+WHY WORK WITH ME?
+--------------------------------------------------------------------------------
+• Real industry experience from a leading IT company
+• Proven mentorship track record across different skill levels
+• Curriculum designed with hiring expectations in mind
+• Focus on building portfolio-worthy projects
+
+================================================================================
+Available for: College Training | Corporate Workshops | 1-on-1 Mentorship
+Contact: contact@codeweavers.in
+================================================================================

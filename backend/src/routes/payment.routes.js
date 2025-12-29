@@ -30,8 +30,23 @@ router.post('/create-checkout-session', protect, asyncHandler(async (req, res) =
     if (existing) {
       return res.json({ success: true, data: { message: 'Already enrolled' } });
     }
-    const enrollment = await Enrollment.create({ user: req.user._id, course: course._id, status: 'enrolled' });
+    const enrollment = await Enrollment.create({ user: req.user._id, course: course._id, status: 'enrolled', paymentStatus: 'paid', pricePaid: 0 });
     return res.json({ success: true, data: { enrollment } });
+  }
+
+  // For paid courses, create or reuse a pending enrollment before checkout and include its id in Stripe session metadata
+  let enrollment = await Enrollment.findOne({ user: req.user._id, course: course._id });
+  if (enrollment && enrollment.status === 'enrolled' && enrollment.paymentStatus === 'paid') {
+    return res.json({ success: true, data: { message: 'Already enrolled' } });
+  }
+
+  if (!enrollment) {
+    enrollment = await Enrollment.create({ user: req.user._id, course: course._id, status: 'pending', paymentStatus: 'pending', pricePaid: 0 });
+  } else {
+    // ensure it's at least pending
+    enrollment.status = enrollment.status || 'pending';
+    enrollment.paymentStatus = enrollment.paymentStatus || 'pending';
+    await enrollment.save();
   }
 
   const origin = req.headers.origin || config.frontendUrl;
@@ -55,10 +70,10 @@ router.post('/create-checkout-session', protect, asyncHandler(async (req, res) =
     ],
     success_url: `${origin}/bootcamps/${course.slug}?session_id={CHECKOUT_SESSION_ID}&status=success`,
     cancel_url: `${origin}/bootcamps/${course.slug}?status=cancel`,
-    metadata: { userId: req.user.id, courseId: course._id.toString(), courseSlug: course.slug },
+    metadata: { userId: req.user.id, courseId: course._id.toString(), courseSlug: course.slug, enrollmentId: enrollment._id.toString() },
   });
 
-  res.json({ success: true, data: { url: session.url, id: session.id } });
+  res.json({ success: true, data: { url: session.url, id: session.id, enrollmentId: enrollment._id } });
 }));
 
 // Webhook endpoint
@@ -74,25 +89,93 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the checkout.session.completed event
+  // Helper to safely extract id values from Stripe objects
+  const getId = (val) => (typeof val === 'string' ? val : (val && val.id ? val.id : null));
+
+  // checkout.session.completed: successful checkout
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const metadata = session.metadata || {};
     const userId = metadata.userId;
     const courseId = metadata.courseId;
 
-    if (userId && courseId) {
-      try {
-        const existing = await Enrollment.findOne({ user: userId, course: courseId });
-        if (!existing) {
-          await Enrollment.create({ user: userId, course: courseId, status: 'enrolled' });
+    const paid = session.payment_status === 'paid';
+    const amount = session.amount_total ? Number(session.amount_total) : (session.amount_subtotal ? Number(session.amount_subtotal) : 0);
+    const paymentIntentId = getId(session.payment_intent);
+
+    // Prefer enrollmentId from metadata if available
+    const enrollmentId = metadata.enrollmentId;
+    try {
+      let enrollment = null;
+      if (enrollmentId) {
+        enrollment = await Enrollment.findById(enrollmentId);
+      }
+
+      // Fallback to user+course lookup for older sessions
+      if (!enrollment && userId && courseId) {
+        enrollment = await Enrollment.findOne({ user: userId, course: courseId });
+      }
+
+      const payload = {
+        paymentProvider: 'stripe',
+        paymentStatus: paid ? 'paid' : 'pending',
+        pricePaid: amount ? (amount / 100) : 0,
+        transactionId: paymentIntentId || null,
+      };
+
+      if (!enrollment) {
+        // Create enrollment if none exists and metadata has necessary info
+        if (userId && courseId) {
+          await Enrollment.create({ user: userId, course: courseId, status: 'enrolled', ...payload });
           console.log('Enrollment created via Stripe webhook for user', userId, 'course', courseId);
         } else {
-          console.log('Enrollment already exists (webhook) for user', userId, 'course', courseId);
+          console.warn('Stripe webhook checkout.session.completed: missing enrollment and metadata to create one');
         }
-      } catch (err) {
-        console.error('Failed to create enrollment from webhook:', err);
+      } else {
+        Object.assign(enrollment, payload);
+        // if it was pending, mark as enrolled
+        enrollment.status = 'enrolled';
+        await enrollment.save();
+        console.log('Enrollment updated via Stripe webhook for enrollment', enrollment._id);
       }
+    } catch (err) {
+      console.error('Failed to create/update enrollment from webhook:', err);
+    }
+  }
+
+  // payment_intent.payment_failed: mark payment failed
+  if (event.type === 'payment_intent.payment_failed') {
+    const paymentIntent = event.data.object;
+    const pid = getId(paymentIntent.id) || getId(paymentIntent);
+    try {
+      const enrollment = await Enrollment.findOne({ transactionId: pid });
+      if (enrollment) {
+        enrollment.paymentStatus = 'failed';
+        await enrollment.save();
+        console.log('Marked enrollment payment as failed for enrollment', enrollment._id);
+      }
+    } catch (err) {
+      console.error('Error handling payment_intent.payment_failed:', err);
+    }
+  }
+
+  // charge.refunded: mark refunded and adjust pricePaid where possible
+  if (event.type === 'charge.refunded') {
+    const charge = event.data.object;
+    const pid = getId(charge.payment_intent) || getId(charge.id);
+    try {
+      const enrollment = await Enrollment.findOne({ $or: [{ transactionId: pid }, { transactionId: charge.id }] });
+      if (enrollment) {
+        enrollment.paymentStatus = 'refunded';
+        if (charge.amount_refunded) {
+          const refunded = Number(charge.amount_refunded) / 100;
+          enrollment.pricePaid = Math.max(0, (enrollment.pricePaid || 0) - refunded);
+        }
+        await enrollment.save();
+        console.log('Marked enrollment as refunded for enrollment', enrollment._id);
+      }
+    } catch (err) {
+      console.error('Error handling charge.refunded:', err);
     }
   }
 
@@ -110,7 +193,21 @@ router.get('/session/:id', protect, asyncHandler(async (req, res) => {
     const metadata = session.metadata || {};
     const userId = metadata.userId;
     const courseId = metadata.courseId;
-    if (userId && courseId) {
+    const enrollmentId = metadata.enrollmentId;
+
+    // If an enrollmentId was provided, update that enrollment directly (and ensure user matches)
+    if (enrollmentId) {
+      const enrollment = await Enrollment.findById(enrollmentId);
+      if (enrollment && req.user && req.user.id && String(enrollment.user) === String(req.user.id)) {
+        enrollment.paymentStatus = 'paid';
+        enrollment.pricePaid = session.amount_total ? Number(session.amount_total) / 100 : (session.amount_subtotal ? Number(session.amount_subtotal) / 100 : 0);
+        enrollment.transactionId = (typeof session.payment_intent === 'string' ? session.payment_intent : (session.payment_intent && session.payment_intent.id) || null);
+        enrollment.status = 'enrolled';
+        await enrollment.save();
+        enrollmentCreated = true;
+        console.log('Enrollment updated via session retrieval for enrollment', enrollment._id);
+      }
+    } else if (userId && courseId) {
       // Only create enrollment if the requesting user matches metadata.userId
       if (req.user && req.user.id && String(req.user.id) === String(userId)) {
         const existing = await Enrollment.findOne({ user: userId, course: courseId });
