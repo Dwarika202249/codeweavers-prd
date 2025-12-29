@@ -163,3 +163,31 @@ html {
     color: #e5e7eb;
   }
 }
+
+/* Custom themed scrollbar */
+:root {
+  --scrollbar-bg: rgba(148,163,184,0.06);
+  --scrollbar-thumb: #6366f1; /* indigo-500 */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
+}
+
+/* Webkit */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+  border-radius: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}

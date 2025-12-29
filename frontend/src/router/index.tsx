@@ -38,6 +38,8 @@ const AdminEnrollmentDetailPage = lazy(() => import('../pages/admin/AdminEnrollm
 const AdminCertificatesPage = lazy(() => import('../pages/admin/AdminCertificatesPage'));
 const AdminCertificateDetailPage = lazy(() => import('../pages/admin/AdminCertificateDetailPage'));
 const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
+const AdminAssignmentsPage = lazy(() => import('../pages/admin/AdminAssignmentsPage'));
+const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignmentDetailPage'));
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -154,6 +156,12 @@ export const router = createBrowserRouter([
       },
       {        path: 'courses',
         element: <LazyPage><CoursesPage /></LazyPage>,
+      },
+      {        path: 'assignments',
+        element: <LazyPage><AdminAssignmentsPage /></LazyPage>,
+      },
+      {        path: 'assignments/:id',
+        element: <LazyPage><AdminAssignmentDetailPage /></LazyPage>,
       },
       {        path: 'enrollments',
         element: <LazyPage><AdminEnrollmentsPage /></LazyPage>,

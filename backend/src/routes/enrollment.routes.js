@@ -1,6 +1,8 @@
 import express from 'express';
 import Enrollment from '../models/Enrollment.model.js';
 import Course from '../models/Course.model.js';
+import Assignment from '../models/Assignment.model.js';
+import Submission from '../models/Submission.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { protect, adminOnly } from '../middleware/auth.middleware.js';
 import Certificate from '../models/Certificate.model.js';
@@ -498,6 +500,36 @@ router.get(
       .populate({ path: 'enrollment', populate: { path: 'course', select: 'title' } });
 
     res.json({ success: true, data: { certificate } });
+  })
+);
+
+/**
+ * GET /api/enrollments/:id/assignments
+ * List assignments for this enrollment's course and include student's submission (if any)
+ */
+router.get(
+  '/:id/assignments',
+  protect,
+  asyncHandler(async (req, res) => {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      res.status(404);
+      throw new Error('Enrollment not found');
+    }
+
+    if (req.user.role !== 'admin' && enrollment.user.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+
+    const assignments = await Assignment.find({ course: enrollment.course, archived: { $ne: true } }).sort({ createdAt: -1 });
+
+    const enriched = await Promise.all(assignments.map(async (a) => {
+      const submission = await Submission.findOne({ assignment: a._id, enrollment: enrollment._id });
+      return { assignment: a, submission };
+    }));
+
+    res.json({ success: true, data: { assignments: enriched } });
   })
 );
 

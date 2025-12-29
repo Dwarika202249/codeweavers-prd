@@ -243,12 +243,20 @@ export const enrollmentAPI = {
   getCertificate: (id: string) => api.get<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificate`),
   applyCertificate: (id: string, data?: { note?: string }) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificates`, data),
   getMyCertificates: () => api.get<{ success: boolean; data: { certificates: any[] } }>(`/enrollments/certificates/my`),
+  getAssignments: (id: string) => api.get<{ success: boolean; data: { assignments: any[] } }>(`/enrollments/${id}/assignments`),
   update: (id: string, data: any) => api.put<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`, data),
   completeLesson: (id: string, payload: { moduleIndex: number; topic: string }) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/complete`, payload),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/enrollments/${id}`),
   uploadAssignment: (id: string, formData: FormData) => api.post<{ success: boolean; data: { assignment: any } }>(`/enrollments/${id}/assignments`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   requestRefund: (id: string) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/request-refund`),
   addNote: (id: string, note: string) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/notes`, { note }),
+};
+
+// Submissions API (student-facing)
+export const submissionsAPI = {
+  submit: (assignmentId: string, data: { enrollmentId: string; link?: string; notes?: string }) => api.post<{ success: boolean; data: { submission: any } }>(`/assignments/${assignmentId}/submissions`, data),
+  submitFile: (assignmentId: string, form: FormData) => api.post<{ success: boolean; data: { submission: any } }>(`/assignments/${assignmentId}/submissions/file`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  // Future: add getMy / getByAssignment for students
 };
 // User admin APIs
 export const userAdminAPI = {
@@ -271,6 +279,28 @@ export const adminCertificatesAPI = {
   issueUpload: (id: string, formData: FormData) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/issue`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   issueGenerate: (id: string) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/issue`, { generate: true }),
   reject: (id: string, notes?: string) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/reject`, { notes }),
+};
+
+// Admin Assignments APIs
+export const adminAssignmentsAPI = {
+  create: (data: { courseId: string; title: string; description?: string; dueDate?: string; allowResubmissions?: boolean; maxScore?: number }) => api.post<{ success: boolean; data: { assignment: any } }>(`/assignments`, data),
+  getAll: (params?: { page?: number; limit?: number; courseId?: string; q?: string }) => api.get<{ success: boolean; data: { assignments: any[]; pagination?: any } }>(`/assignments`, { params }),
+  getById: (id: string) => api.get<{ success: boolean; data: { assignment: any; submissionCount?: number } }>(`/assignments/${id}`),
+  update: (id: string, data: any) => api.put<{ success: boolean; data: { assignment: any } }>(`/assignments/${id}`, data),
+  remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/assignments/${id}`),
+};
+
+// Admin Submissions APIs
+export const adminSubmissionsAPI = {
+  getByAssignment: (id: string, params?: { page?: number; limit?: number; status?: string }) => api.get<{ success: boolean; data: { submissions: any[]; pagination?: any } }>(`/assignments/${id}/submissions`, { params }),
+  grade: (id: string, data: { score?: number; feedback?: string; status?: 'graded'|'rejected' }) => api.patch<{ success: boolean; data: { submission: any } }>(`/assignments/submissions/${id}/grade`, data),
+};
+
+// Notifications API
+export const notificationsAPI = {
+  getAll: (params?: { limit?: number }) => api.get<{ success: boolean; data: { notifications: any[]; unreadCount: number } }>(`/notifications`, { params }),
+  markRead: (id: string) => api.patch<{ success: boolean; data: { notification: any } }>(`/notifications/${id}/read`),
+  markAllRead: () => api.patch<{ success: boolean }>(`/notifications/read-all`),
 };
 
 // Download APIs that require auth and blob response

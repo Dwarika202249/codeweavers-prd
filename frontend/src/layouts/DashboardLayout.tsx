@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { NotificationsProvider } from '../contexts/NotificationContext';
+import NotificationsBell from '../components/NotificationsBell';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -38,6 +40,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Users', to: '/admin/users', icon: <Users className="w-5 h-5" /> },
   { label: 'Enrollments', to: '/admin/enrollments', icon: <BookOpen className="w-5 h-5" /> },
   { label: 'Certificates', to: '/admin/certificates', icon: <FileText className="w-5 h-5" /> },
+  { label: 'Assignments', to: '/admin/assignments', icon: <FileText className="w-5 h-5" /> },
   { label: 'Courses', to: '/admin/courses', icon: <BookOpen className="w-5 h-5" /> },
   { label: 'Blog Posts', to: '/admin/blog', icon: <FileText className="w-5 h-5" /> },
   { label: 'Testimonials', to: '/admin/testimonials', icon: <Quote className="w-5 h-5" /> },
@@ -64,10 +67,11 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Toaster />
-      
-      {/* Mobile sidebar backdrop */}
+    <NotificationsProvider>
+      <div className="min-h-screen bg-gray-900">
+        <Toaster />
+        
+        {/* Mobile sidebar backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -82,7 +86,7 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-950 border-r border-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-950 border-r border-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -129,7 +133,7 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 min-h-0 p-4 space-y-1 overflow-y-auto">
           <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
             {dashboardTitle}
           </p>
@@ -191,7 +195,8 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Quick actions can go here */}
+              {/* Notifications & quick actions */}
+              <NotificationsBell />
               <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400">
                 <span>Welcome,</span>
                 <span className="font-medium text-white">{user?.name?.split(' ')[0]}</span>
@@ -206,5 +211,6 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
         </main>
       </div>
     </div>
+    </NotificationsProvider>
   );
 }
