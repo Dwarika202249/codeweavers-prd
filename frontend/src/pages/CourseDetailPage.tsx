@@ -123,6 +123,12 @@ export default function CourseDetailPage() {
             <p className="mt-4 text-lg text-gray-300">{course.description}</p>
           </motion.div>
 
+          {(course.coverImageThumb || course.coverImage) && (
+            <div className="mt-6">
+              <img src={course.coverImageThumb || course.coverImage} alt={course.title} className="w-full h-56 rounded-lg object-cover" />
+            </div>
+          )}
+
           {/* Quick Info */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { courseAPI } from '../../lib/api';
+import { courseAPI, uploadsAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import SEO from '../../components/SEO';
 
@@ -9,6 +9,8 @@ export default function AdminCourseForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [form, setForm] = useState<any>({
     title: '',
     slug: '',
@@ -66,6 +68,44 @@ export default function AdminCourseForm() {
       .catch((err) => showError(err.message))
       .finally(() => setInitialLoading(false));
   }, [id]);
+
+  const handleCoverFile = async (file?: File) => {
+    if (!file) return;
+
+    // show a client-side preview immediately
+    const objectUrl = URL.createObjectURL(file);
+    setCoverPreview(objectUrl);
+
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await uploadsAPI.uploadCourseImage(formData);
+      const url = res.data.data.url;
+      const thumbnailUrl = res.data.data.thumbnailUrl ?? null;
+      setForm((prev: any) => ({ ...prev, coverImage: url, coverImageThumb: thumbnailUrl }));
+      // If we're editing an existing course, persist coverImage and thumb immediately to DB to avoid losing it
+      if (id) {
+        try {
+          await courseAPI.update(id, { coverImage: url, coverImageThumb: thumbnailUrl ?? undefined });
+          showSuccess('Cover image uploaded and saved to course');
+        } catch (err: any) {
+          showError('Uploaded, but failed to save cover to course: ' + (err.message || String(err)));
+        }
+      } else {
+        showSuccess('Cover image uploaded (remember to save the course)');
+      }
+    } catch (err: any) {
+      showError(err.message || 'Failed to upload image');
+    } finally {
+      setUploadingCover(false);
+      // revoke temporary preview after some time (we keep preview until saved/removed)
+      setTimeout(() => {
+        try { URL.revokeObjectURL(objectUrl); } catch (e) { /* ignore */ }
+      }, 10000);
+    }
+  };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm((prev: any) => ({ ...prev, [e.target.name]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
@@ -169,6 +209,30 @@ export default function AdminCourseForm() {
         <div>
           <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-200 mb-1">Short Description</label>
           <input id="shortDescription" name="shortDescription" value={form.shortDescription} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-1">Cover Image</label>
+          <div className="flex items-center gap-3">
+            <div className="w-32 h-20 rounded overflow-hidden bg-gray-800 flex items-center justify-center">
+              {coverPreview ? (
+                <img src={coverPreview} alt="cover preview" className="w-full h-full object-cover" />
+              ) : form.coverImage ? (
+                <img src={form.coverImage} alt="cover" className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-xs text-gray-500">No image</div>
+              )}
+            </div>
+            <div className="flex-1">
+              <input id="cover-file" aria-label="Cover image file" type="file" accept="image/*" onChange={(e) => handleCoverFile(e.target.files ? e.target.files[0] : undefined)} />
+              <div className="mt-2 text-sm text-gray-400">{uploadingCover ? 'Uploading...' : 'Upload a cover image to show on course pages'}</div>
+              {form.coverImage && (
+                <div className="mt-2 flex items-center gap-2">
+                  <button type="button" onClick={() => { setForm((p:any) => ({ ...p, coverImage: '' })); setCoverPreview(null); }} className="px-2 py-1 rounded bg-red-600 text-white text-sm">Remove</button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-1">Description</label>

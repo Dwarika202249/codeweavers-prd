@@ -190,6 +190,7 @@ export interface Course {
   schedule?: string;
   published?: boolean;
   coverImage?: string;
+  coverImageThumb?: string;
   instructor?: string;
   tags?: string[];
   createdBy?: string;
@@ -217,6 +218,11 @@ export const courseAPI = {
   update: (id: string, data: Partial<Course>) =>
     api.put<{ success: boolean; data: { course: Course } }>(`/courses/${id}`, data),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
+};
+
+// Uploads
+export const uploadsAPI = {
+  uploadCourseImage: (form: FormData) => api.post<{ success: boolean; data: { url: string; thumbnailUrl?: string } }>(`/uploads/courses`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // Payments API

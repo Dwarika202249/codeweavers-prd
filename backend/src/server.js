@@ -54,6 +54,8 @@ import exportRoutes from './routes/export.routes.js';
 app.use('/api/export', exportRoutes);
 import paymentRoutes from './routes/payment.routes.js';
 app.use('/api/payments', paymentRoutes);
+import uploadRoutes from './routes/upload.routes.js';
+app.use('/api/uploads', uploadRoutes);
 
 // Error handling
 app.use(notFound);

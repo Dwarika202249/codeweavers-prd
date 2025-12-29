@@ -184,7 +184,7 @@ router.post(
     }
 
     const file = req.file;
-    const fileUrl = `/uploads/enrollments/${file.filename}`;
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/enrollments/${file.filename}`;
 
     enrollment.assignments = enrollment.assignments || [];
     const assignment = {

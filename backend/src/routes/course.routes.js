@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Create course (admin only)
 router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
-  const { title, slug, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, published, targetAudience, topics, tags } = req.body;
+  const { title, slug, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, published, coverImage, targetAudience, topics, tags } = req.body;
 
   if (!title) {
     res.status(400);
@@ -36,7 +36,7 @@ router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
 
   const tagsClean = Array.isArray(req.body.tags) ? req.body.tags.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.tags === 'string' ? req.body.tags.split(',').map(s => s.trim()).filter(Boolean) : []);
 
-  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, prerequisites, learningOutcomes, schedule, curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
+  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, coverImage: coverImage || '', coverImageThumb: req.body.coverImageThumb || '', prerequisites, learningOutcomes, schedule, curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
 
   res.status(201).json({ success: true, data: { course } });
 }));
@@ -125,6 +125,11 @@ router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   // allow tags update (clean strings)
   if (typeof req.body.tags !== 'undefined') {
     course.tags = Array.isArray(req.body.tags) ? req.body.tags.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.tags === 'string' ? req.body.tags.split(',').map(s => s.trim()).filter(Boolean) : []);
+  }
+
+  // allow cover image thumb update
+  if (typeof req.body.coverImageThumb !== 'undefined') {
+    course.coverImageThumb = req.body.coverImageThumb || '';
   }
 
   // apply other fields

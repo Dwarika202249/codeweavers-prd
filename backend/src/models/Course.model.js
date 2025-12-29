@@ -13,6 +13,7 @@ const CourseSchema = new mongoose.Schema({
   learningOutcomes: [{ type: String }],
   schedule: { type: String },
   coverImage: { type: String },
+  coverImageThumb: { type: String },
   instructor: { type: String },
   tags: [{ type: String }],
   targetAudience: [{ type: String }],
