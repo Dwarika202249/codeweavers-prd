@@ -334,7 +334,7 @@ router.post(
         existing.requestAt = new Date();
         await existing.save();
 
-        // Notify admin
+        // Notify admin via email
         try {
           await sendEmail({
             to: (process.env.ADMIN_EMAIL || 'contact@codeweavers.in'),
@@ -347,6 +347,21 @@ router.post(
           console.warn('Failed to send certificate re-request email', err);
         }
 
+        // Notify admins in-app
+        try {
+          const Notification = (await import('../models/Notification.model.js')).default;
+          const admins = await User.find({ role: 'admin' }).select('_id');
+          await Promise.all(admins.map((a) => Notification.create({
+            user: a._id,
+            type: 'certificate_requested',
+            title: `Certificate re-requested by ${req.user.name}`,
+            message: `${req.user.name} has re-requested a certificate for ${enrollment.course?.title || 'a course'}`,
+            data: { enrollment: enrollment._id, certificate: existing._id },
+          })));
+        } catch (e) {
+          console.warn('Failed to create admin notification for certificate re-request', e);
+        }
+
         return res.json({ success: true, data: { certificate: existing } });
       }
 
@@ -356,7 +371,7 @@ router.post(
 
     const cert = await Certificate.create({ enrollment: enrollment._id, student: req.user._id, notes: req.body.note || '' });
 
-    // Notify admin
+    // Notify admin via email
     try {
       await sendEmail({
         to: (process.env.ADMIN_EMAIL || 'contact@codeweavers.in'),
@@ -367,6 +382,21 @@ router.post(
       });
     } catch (err) {
       console.warn('Failed to send certificate request email', err);
+    }
+
+    // Notify admins in-app
+    try {
+      const Notification = (await import('../models/Notification.model.js')).default;
+      const admins = await User.find({ role: 'admin' }).select('_id');
+      await Promise.all(admins.map((a) => Notification.create({
+        user: a._id,
+        type: 'certificate_requested',
+        title: `New certificate request from ${req.user.name}`,
+        message: `${req.user.name} has requested a certificate for ${enrollment.course?.title || 'a course'}`,
+        data: { enrollment: enrollment._id, certificate: cert._id },
+      })));
+    } catch (e) {
+      console.warn('Failed to create admin notification for certificate request', e);
     }
 
     res.status(201).json({ success: true, data: { certificate: cert } });
@@ -656,7 +686,7 @@ router.post(
       await enrollment.save();
     }
 
-    // notify student
+    // notify student via email and in-app
     try {
       const student = await User.findById(certificate.student);
       const courseTitle = certificate.enrollment?.course?.title || 'your course';
@@ -667,6 +697,20 @@ router.post(
         html: `<p>Hi ${student.name || 'Student'},</p><p>Your certificate for <strong>${courseTitle}</strong> has been issued. <a href="${downloadLink}">Download your certificate</a></p>`,
         text: `Your certificate for ${courseTitle} has been issued. Download: ${downloadLink}`,
       });
+
+      // in-app notification
+      try {
+        const Notification = (await import('../models/Notification.model.js')).default;
+        await Notification.create({
+          user: student._id,
+          type: 'certificate_issued',
+          title: `Your certificate for ${courseTitle} is ready`,
+          message: `Download your certificate for ${courseTitle}`,
+          data: { certificate: certificate._id, enrollment: certificate.enrollment },
+        });
+      } catch (e) {
+        console.warn('Failed to create in-app notification for certificate issued', e);
+      }
     } catch (err) {
       console.warn('Failed to send certificate issued email', err);
     }
@@ -691,7 +735,7 @@ router.post(
 
     await certificate.markRejected({ notes: req.body.notes || '' });
 
-    // notify student
+    // notify student via email and in-app
     try {
       const student = await User.findById(certificate.student);
       await sendEmail({
@@ -700,6 +744,20 @@ router.post(
         html: `<p>Hi ${student.name || 'Student'},</p><p>Your certificate request has been rejected. Notes: ${certificate.notes || ''}</p>`,
         text: `Your certificate request has been rejected. Notes: ${certificate.notes || ''}`,
       });
+
+      // in-app notification
+      try {
+        const Notification = (await import('../models/Notification.model.js')).default;
+        await Notification.create({
+          user: student._id,
+          type: 'certificate_rejected',
+          title: `Certificate request rejected`,
+          message: `${certificate.notes || ''}`,
+          data: { certificate: certificate._id, enrollment: certificate.enrollment },
+        });
+      } catch (e) {
+        console.warn('Failed to create in-app notification for certificate rejection', e);
+      }
     } catch (err) {
       console.warn('Failed to send certificate rejection email', err);
     }

@@ -2,21 +2,17 @@ import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+
 
 export default function NotificationsBell() {
   const { notifications, unreadCount, loading, markRead, markAllRead } = useNotifications();
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleClick = (n: any) => {
+    // Mark notification as read and close the dropdown.
+    // Do NOT navigate to enrollment pages from notifications to avoid inadvertent redirection/security issues.
     if (!n.read) markRead(n._id);
     setOpen(false);
-    if (n.data && n.data.enrollment) {
-      navigate(`/dashboard/courses/${n.data.enrollment}`);
-    } else if (n.data && n.data.assignment) {
-      navigate(`/dashboard/courses/${n.data.enrollment}`);
-    }
   };
 
   return (
