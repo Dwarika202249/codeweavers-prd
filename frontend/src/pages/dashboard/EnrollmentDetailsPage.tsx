@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { enrollmentAPI, API_BASE, downloadAPI } from '../../lib/api';
+import { enrollmentAPI, downloadAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
 import { Loader2, UploadCloud, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
