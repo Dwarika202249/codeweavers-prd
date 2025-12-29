@@ -9,6 +9,7 @@ import Certificate from '../models/Certificate.model.js';
 import User from '../models/User.model.js';
 import { sendEmail } from '../services/email.service.js';
 import { generateCertificatePDF } from '../services/certificate.service.js';
+import config from '../config/index.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -648,7 +649,12 @@ router.post(
       const enrollment = await Enrollment.findById(certificate.enrollment).populate('course');
       const student = await User.findById(certificate.student);
       const serial = `CW-${Date.now()}`;
-      const result = await generateCertificatePDF({ studentName: student?.name || 'Student', courseTitle: enrollment?.course?.title || 'Course', issuedAt: new Date(), serial });
+      const verificationUrl = `${req.protocol}://${req.get('host')}/api/certificates/${certificate._id}/download`;
+      // Prefer course instructor name for signature if available
+      const instructorName = enrollment?.course?.instructor || 'Course Instructor';
+      const signaturePath = config.certificateSignaturePath || '';
+      const logoPath = config.certificateLogoPath || '';
+      const result = await generateCertificatePDF({ studentName: student?.name || 'Student', courseTitle: enrollment?.course?.title || 'Course', issuedAt: new Date(), serial, issuerName: instructorName, logoPath, signaturePath, verificationUrl });
       // normalize fileUrl returned by service to point to THIS backend host's uploads path
       if (result.fileUrl) {
         try {

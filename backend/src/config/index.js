@@ -32,6 +32,14 @@ const config = {
   // Frontend
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
+  // Certificate defaults (paths to optional logo and signature images)
+  // These can point to files on the server filesystem (recommended: public/logo.png and public/signature.png)
+  certificateLogoPath: process.env.CERTIFICATE_LOGO_PATH || (process.env.NODE_ENV === 'production' ? '' : path.resolve(process.cwd(), 'public', 'logo.png')),
+  certificateSignaturePath: process.env.CERTIFICATE_SIGNATURE_PATH || (process.env.NODE_ENV === 'production' ? '' : path.resolve(process.cwd(), 'public', 'signature.png')),
+
+  // Certificate design
+  certificatePrimaryColor: process.env.CERTIFICATE_PRIMARY_COLOR || '#3B82F6', // app primary (Tailwind primary)
+
   // Stripe
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
