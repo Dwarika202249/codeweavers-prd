@@ -238,6 +238,7 @@ export const enrollmentAPI = {
   getAll: (params?: { page?: number; limit?: number }) => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments', { params }),
   getById: (id: string) => api.get<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`),
   update: (id: string, data: any) => api.put<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`, data),
+  completeLesson: (id: string, payload: { moduleIndex: number; topic: string }) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/complete`, payload),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/enrollments/${id}`),
   uploadAssignment: (id: string, formData: FormData) => api.post<{ success: boolean; data: { assignment: any } }>(`/enrollments/${id}/assignments`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   requestRefund: (id: string) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/request-refund`),

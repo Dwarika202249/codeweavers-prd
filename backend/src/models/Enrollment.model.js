@@ -19,7 +19,14 @@ const enrollmentSchema = new mongoose.Schema(
     endDate: { type: Date },
     cohort: { type: String },
 
-    // Modules & completion tracking
+    // Modules & completion tracking (per-topic/lesson granularity)
+    completedLessons: [
+      {
+        moduleIndex: { type: Number },
+        topic: { type: String },
+        completedAt: { type: Date, default: Date.now },
+      },
+    ],
     completedModules: [{ type: mongoose.Schema.Types.Mixed }],
 
     // Assignments & submissions (simple file upload reference)
@@ -52,6 +59,56 @@ const enrollmentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Methods
+// Recompute progress based on course curriculum and completedLessons
+enrollmentSchema.methods.recomputeProgress = async function () {
+  try {
+    const CourseModel = (await import('./Course.model.js')).default;
+    const course = await CourseModel.findById(this.course).lean();
+    if (!course || !Array.isArray(course.curriculum)) {
+      this.progress = 0;
+      await this.save();
+      return this;
+    }
+
+    // Count total topics (treat topics as lessons)
+    let total = 0;
+    for (const m of course.curriculum) {
+      if (Array.isArray(m.topics)) total += m.topics.length;
+    }
+
+    // Count unique completed lessons that match course curriculum
+    const completedSet = new Set();
+    for (const c of (this.completedLessons || [])) {
+      if (typeof c.moduleIndex === 'number' && typeof c.topic === 'string') {
+        completedSet.add(`${c.moduleIndex}::${c.topic}`);
+      }
+    }
+
+    // Ensure completed lessons actually exist in course before counting
+    let validCompleted = 0;
+    for (const key of completedSet) {
+      const [modIdxStr, topic] = key.split('::');
+      const modIdx = Number(modIdxStr);
+      const mod = course.curriculum[modIdx];
+      if (mod && Array.isArray(mod.topics) && mod.topics.includes(topic)) validCompleted++;
+    }
+
+    this.progress = total ? Math.round((validCompleted / total) * 100) : 0;
+
+    if (this.progress === 100) {
+      this.status = 'completed';
+      if (!this.certificateIssuedAt) this.certificateIssuedAt = new Date();
+    }
+
+    await this.save();
+    return this;
+  } catch (err) {
+    console.error('recomputeProgress error', err);
+    return this;
+  }
+};
 
 // Prevent duplicate enrollment for same user+course
 enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });

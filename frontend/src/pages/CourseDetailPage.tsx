@@ -120,6 +120,10 @@ export default function CourseDetailPage() {
               </span>
             </div>
             <h1 className="mt-4 text-4xl font-bold text-white">{course.title}</h1>
+            <div className="mt-2 flex items-center gap-3 text-sm text-gray-400">
+              <Users className="w-4 h-4 text-indigo-400" />
+              <div>Instructor: <span className="font-medium text-white">{course.instructor || '—'}</span></div>
+            </div>
             <p className="mt-4 text-lg text-gray-300">{course.description}</p>
           </motion.div>
 

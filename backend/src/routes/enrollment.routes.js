@@ -235,6 +235,56 @@ router.post(
 );
 
 /**
+ * POST /api/enrollments/:id/complete
+ * Mark a lesson/topic as completed (owner or admin)
+ */
+router.post(
+  '/:id/complete',
+  protect,
+  asyncHandler(async (req, res) => {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      res.status(404);
+      throw new Error('Enrollment not found');
+    }
+
+    if (req.user.role !== 'admin' && enrollment.user.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+
+    const { moduleIndex, topic } = req.body;
+    if (typeof moduleIndex !== 'number' || !topic) {
+      res.status(400);
+      throw new Error('moduleIndex and topic are required');
+    }
+
+    // validate the module/topic exists in the course
+    const course = await Course.findById(enrollment.course);
+    if (!course) {
+      res.status(404);
+      throw new Error('Course not found');
+    }
+
+    const mod = (course.curriculum || [])[moduleIndex];
+    if (!mod || !Array.isArray(mod.topics) || !mod.topics.includes(topic)) {
+      res.status(400);
+      throw new Error('Invalid moduleIndex or topic');
+    }
+
+    enrollment.completedLessons = enrollment.completedLessons || [];
+    const exists = enrollment.completedLessons.some(c => c.moduleIndex === moduleIndex && c.topic === topic);
+    if (!exists) {
+      enrollment.completedLessons.push({ moduleIndex, topic, completedAt: new Date() });
+      await enrollment.save();
+      await enrollment.recomputeProgress();
+    }
+
+    res.json({ success: true, data: { enrollment } });
+  })
+);
+
+/**
  * POST /api/enrollments/:id/request-refund
  * mark refund requested (simple placeholder)
  */

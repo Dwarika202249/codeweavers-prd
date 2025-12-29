@@ -82,17 +82,41 @@ export default function EnrollmentDetailsPage() {
         <div className="bg-gray-800 rounded p-4">
           <h3 className="font-medium text-white">Curriculum</h3>
           <div className="mt-3 space-y-2">
-            {(course.curriculum || []).map((m: any, i: number) => (
-              <div key={i} className="p-3 rounded border border-gray-700 bg-gray-900">
-                <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="font-medium text-white truncate">{m.title || `Week ${m.week || i+1}`}</div>
-                      <div className="text-sm text-gray-400 truncate">{(m.topics || []).join(', ')}</div>
+            {(course.curriculum || []).map((m: any, i: number) => {
+              const topics: string[] = Array.isArray(m.topics) ? m.topics : [];
+              return (
+                <div key={i} className="p-3 rounded border border-gray-700 bg-gray-900">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1">
+                      <div className="font-medium text-white">{m.title || `Week ${m.week || i+1}`}</div>
+                      <div className="mt-2 space-y-2">
+                        {topics.map((t, ti) => {
+                          const completed = (enrollment.completedLessons || []).some((c: any) => c.moduleIndex === i && c.topic === t);
+                          return (
+                            <div key={ti} className="flex items-center justify-between p-2 rounded bg-gray-900 border border-gray-800">
+                              <div className="flex items-center gap-3">
+                                <input aria-label={`Complete ${t}`} type="checkbox" checked={completed} onChange={async () => {
+                                  try {
+                                    await enrollmentAPI.completeLesson(id!, { moduleIndex: i, topic: t });
+                                    const updated = await enrollmentAPI.getById(id!);
+                                    setEnrollment(updated.data.data.enrollment);
+                                  } catch (err: any) {
+                                    setError(err.message || 'Failed');
+                                  }
+                                }} />
+                                <div className="text-sm text-gray-300">{t}</div>
+                              </div>
+                              <div className="text-xs text-gray-400">{completed ? 'Done' : 'Not started'}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-300 whitespace-nowrap shrink-0">{(enrollment.completedModules || []).includes(m.title || m.week || String(i)) ? 'Done' : 'Not started'}</div>
+                    <div className="text-sm text-gray-300 whitespace-nowrap shrink-0">{(enrollment.progress || 0)}%</div>
                   </div>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
 

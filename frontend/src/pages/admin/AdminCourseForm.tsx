@@ -11,6 +11,7 @@ export default function AdminCourseForm() {
   const [initialLoading, setInitialLoading] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [savingInstructor, setSavingInstructor] = useState(false);
   const [form, setForm] = useState<any>({
     title: '',
     slug: '',
@@ -237,6 +238,26 @@ export default function AdminCourseForm() {
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-1">Description</label>
           <textarea id="description" name="description" value={form.description} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white h-32" />
+        </div>
+
+        <div>
+          <label htmlFor="instructor" className="block text-sm font-medium text-gray-200 mb-1">Instructor</label>
+          <div className="flex items-center gap-2">
+            <input id="instructor" name="instructor" value={form.instructor} onChange={handleChange} onBlur={async (e) => {
+              if (!id) return;
+              const value = (e.target as HTMLInputElement).value;
+              try {
+                setSavingInstructor(true);
+                await courseAPI.update(id, { instructor: value || '' });
+                showSuccess('Instructor saved');
+              } catch (err: any) {
+                showError('Failed to save instructor: ' + (err.message || String(err)));
+              } finally {
+                setSavingInstructor(false);
+              }
+            }} className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
+            {savingInstructor ? <div className="text-xs text-gray-400">Saving…</div> : null}
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>

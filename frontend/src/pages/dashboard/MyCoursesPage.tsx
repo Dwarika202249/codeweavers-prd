@@ -46,8 +46,8 @@ export default function MyCoursesPage() {
                 <div className="text-sm text-gray-300">{e.progress ?? 0}%</div>
               </div>
               <div className="mt-3 flex gap-2">
-                <Link to={`/bootcamps/${e.course.slug}`} className="px-3 py-2 rounded bg-indigo-600 text-white">Continue</Link>
-                <Link to={`/dashboard/courses/${e._id}`} className="px-3 py-2 rounded bg-gray-700 text-white">Details</Link>
+                <Link to={`/dashboard/courses/${e._id}`} className="px-3 py-2 rounded bg-indigo-600 text-white">Continue</Link>
+                <Link to={`/bootcamps/${e.course.slug}`} className="px-3 py-2 rounded bg-gray-700 text-white">Details</Link>
               </div>
             </div>
           ))}
