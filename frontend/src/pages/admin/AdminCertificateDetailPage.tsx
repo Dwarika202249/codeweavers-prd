@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { adminCertificatesAPI, API_BASE, downloadAPI } from '../../lib/api';
+import { adminCertificatesAPI, downloadAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
 import { Loader2 } from 'lucide-react';
 import { showError, showSuccess } from '../../lib/toastUtils';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { enrollmentAPI, API_BASE, downloadAPI } from '../lib/api';
+import { enrollmentAPI, downloadAPI } from '../lib/api';
 import { Loader2 } from 'lucide-react';
 import { showError } from '../lib/toastUtils';
 
