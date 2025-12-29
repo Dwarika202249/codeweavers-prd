@@ -4,6 +4,8 @@ import { enrollmentAPI } from '../../lib/api';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import SEO from '../../components/SEO';
+import React from 'react';
+const CertificatesList = React.lazy(() => import('../../components/CertificatesList'));
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -47,7 +49,7 @@ export default function ProfilePage() {
           <div className="text-sm text-gray-400 mt-1">{user?.email}</div>
           <div className="mt-3 flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-300 text-sm">Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-800 text-gray-300 text-sm">{user?.role === 'admin' ? 'Admin' : 'Student'}</span>
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-300 text-sm">{user?.role === 'admin' ? 'Admin' : 'Student'}</span>
           </div>
         </div>
         <div className="w-full md:w-auto flex gap-3 justify-end items-center md:flex-nowrap flex-wrap">
@@ -92,12 +94,28 @@ export default function ProfilePage() {
                     <progress value={Math.min(100, Math.max(0, Number(e.progress) || 0))} max={100} className="w-full h-2 rounded appearance-none" />
                     <div className="text-xs text-gray-400 mt-2 flex items-center justify-between">
                       <span>{e.status?.charAt(0)?.toUpperCase() + (e.status?.slice(1) || '')}</span>
-                      <Link to={`/bootcamps/${e.course?.slug}`} className="text-xs text-indigo-400 hover:text-indigo-300">Continue</Link>
+                      <Link to={`/dashboard/courses/${e._id}`} className="text-xs text-indigo-400 hover:text-indigo-300">Continue</Link>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+
+            {/* Certificates list */}
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-white">Certificates</h3>
+              <div className="mt-3">
+                <div className="rounded border border-gray-700 bg-gray-900 p-3">
+                  <p className="text-xs text-gray-400">Your issued certificates and requests</p>
+                  <div className="mt-2">
+                    {/* lazy loaded certificates list component */}
+                    <React.Suspense fallback={<div className="text-gray-400">Loading certificates…</div>}>
+                      <CertificatesList />
+                    </React.Suspense>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

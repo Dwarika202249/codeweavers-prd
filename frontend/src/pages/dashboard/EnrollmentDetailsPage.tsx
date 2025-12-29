@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { enrollmentAPI } from '../../lib/api';
+import { enrollmentAPI, API_BASE, downloadAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
 import { Loader2, UploadCloud, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { showError, showSuccess } from '../../lib/toastUtils';
 
 export default function EnrollmentDetailsPage() {
   const { id } = useParams<{ id?: string }>();
@@ -15,6 +16,32 @@ export default function EnrollmentDetailsPage() {
   const [notes, setNotes] = useState('');
   const [openModules, setOpenModules] = useState<number[]>([]);
 
+  const [certificate, setCertificate] = useState<any | null>(null);
+  const [certLoading, setCertLoading] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async (id: string, filename?: string) => {
+    setDownloading(true);
+    try {
+      const res = await downloadAPI.certificate(id);
+      const blob = new Blob([res.data], { type: (res.headers && res.headers['content-type']) || 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename ? `${filename.replace(/\s+/g, '_')}-certificate.pdf` : 'certificate.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      showError(err?.message || 'Download failed');
+      console.error('Download certificate error', err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const toggleModule = (index: number) => {
     setOpenModules((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]));
   }; 
@@ -22,10 +49,27 @@ export default function EnrollmentDetailsPage() {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    enrollmentAPI.getById(id)
-      .then((res) => setEnrollment(res.data.data.enrollment))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    setCertLoading(true);
+    Promise.all([enrollmentAPI.getById(id), enrollmentAPI.getCertificate(id)])
+      .then(([enRes, certRes]) => {
+        setEnrollment(enRes.data.data.enrollment);
+        setCertificate(certRes.data.data.certificate || null);
+      })
+      .catch((err) => {
+        // if certificate endpoint returns 404 it will be rejected; handle gracefully
+        if (err.message && err.message.includes('not found')) {
+          // still get enrollment
+          enrollmentAPI.getById(id)
+            .then((res) => setEnrollment(res.data.data.enrollment))
+            .catch((e) => setError(e.message));
+        } else {
+          setError(err.message);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+        setCertLoading(false);
+      });
   }, [id]);
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -67,6 +111,55 @@ export default function EnrollmentDetailsPage() {
             <div className="px-2 py-1 rounded bg-indigo-700 text-sm text-white">{enrollment.status}</div>
             <div className="text-sm text-gray-400">Enrolled: {new Date(enrollment.createdAt).toLocaleDateString()}</div>
             <div className="text-sm text-gray-400">Payment: {enrollment.paymentStatus || 'N/A'}</div>
+
+            <div className="ml-4">
+              {certLoading ? (
+                <div className="text-xs text-gray-400">Checking certificate…</div>
+              ) : !certificate ? (
+                Number(enrollment.progress || 0) >= 100 ? (
+                  <button onClick={async () => {
+                    if (!id) return;
+                    setApplying(true);
+                    try {
+                      const res = await enrollmentAPI.applyCertificate(id, { note: '' });
+                      setCertificate(res.data.data.certificate);
+                      showSuccess('Certificate request submitted');
+                    } catch (err: any) {
+                      showError(err.message || 'Failed to request certificate');
+                    } finally {
+                      setApplying(false);
+                    }
+                  }} disabled={applying} className="px-3 py-1 rounded bg-yellow-600 text-black text-sm">{applying ? 'Applying...' : 'Apply for Certificate'}</button>
+                ) : (
+                  <div className="text-xs text-gray-400">Certificate: Not eligible</div>
+                )
+              ) : certificate.status === 'requested' ? (
+                <div className="text-xs text-yellow-300">Certificate request pending</div>
+              ) : certificate.status === 'rejected' ? (
+                <div className="text-xs text-red-400 flex items-center gap-2">
+                  <span>Rejected</span>
+                  <button onClick={async () => {
+                    if (!id) return;
+                    setApplying(true);
+                    try {
+                      const res = await enrollmentAPI.applyCertificate(id, { note: '' });
+                      setCertificate(res.data.data.certificate);
+                      showSuccess('Certificate re-requested');
+                    } catch (err: any) {
+                      showError(err.message || 'Failed to re-request certificate');
+                    } finally {
+                      setApplying(false);
+                    }
+                  }} className="px-2 py-1 rounded bg-yellow-600 text-black text-xs">Reapply</button>
+                </div>
+              ) : certificate.status === 'issued' ? (
+                <div className="flex items-center gap-2">
+                  <button className="text-xs text-green-300 hover:underline" onClick={() => handleDownload(certificate._id, course.title)} disabled={downloading}>{downloading ? 'Downloading...' : 'Download Certificate'}</button>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-400">Certificate: {certificate.status}</div>
+              )}
+            </div>
           </div>
         </div>
       </div>

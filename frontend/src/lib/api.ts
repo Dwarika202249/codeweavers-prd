@@ -9,6 +9,9 @@ const api = axios.create({
   },
 });
 
+// Export API base used for browser-facing links (e.g., downloads)
+export const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
 // Token storage key
 const TOKEN_KEY = 'cw_auth_token';
 
@@ -237,6 +240,9 @@ export const enrollmentAPI = {
   getMy: () => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments'),
   getAll: (params?: { page?: number; limit?: number }) => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments', { params }),
   getById: (id: string) => api.get<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`),
+  getCertificate: (id: string) => api.get<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificate`),
+  applyCertificate: (id: string, data?: { note?: string }) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificates`, data),
+  getMyCertificates: () => api.get<{ success: boolean; data: { certificates: any[] } }>(`/enrollments/certificates/my`),
   update: (id: string, data: any) => api.put<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`, data),
   completeLesson: (id: string, payload: { moduleIndex: number; topic: string }) => api.post<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}/complete`, payload),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/enrollments/${id}`),
@@ -256,6 +262,20 @@ export const userAdminAPI = {
   // Server-side export (streamed as CSV)
   exportUsers: (params?: { search?: string; role?: string; isActive?: boolean; from?: string; to?: string; limit?: number }) =>
     api.get(`/export/users`, { params, responseType: 'blob' }),
+};
+
+// Admin Certificates APIs
+export const adminCertificatesAPI = {
+  getAll: (params?: { page?: number; limit?: number; status?: string }) => api.get<{ success: boolean; data: { certificates: any[]; pagination?: any } }>(`/enrollments/certificates`, { params }),
+  getById: (id: string) => api.get<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}`),
+  issueUpload: (id: string, formData: FormData) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/issue`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  issueGenerate: (id: string) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/issue`, { generate: true }),
+  reject: (id: string, notes?: string) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/certificates/${id}/reject`, { notes }),
+};
+
+// Download APIs that require auth and blob response
+export const downloadAPI = {
+  certificate: (id: string) => api.get(`/certificates/${id}/download`, { responseType: 'blob' }),
 };
 
 // Export the axios instance for custom requests

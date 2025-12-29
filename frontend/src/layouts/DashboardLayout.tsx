@@ -37,6 +37,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Inquiries', to: '/admin/inquiries', icon: <MessageSquare className="w-5 h-5" /> },
   { label: 'Users', to: '/admin/users', icon: <Users className="w-5 h-5" /> },
   { label: 'Enrollments', to: '/admin/enrollments', icon: <BookOpen className="w-5 h-5" /> },
+  { label: 'Certificates', to: '/admin/certificates', icon: <FileText className="w-5 h-5" /> },
   { label: 'Courses', to: '/admin/courses', icon: <BookOpen className="w-5 h-5" /> },
   { label: 'Blog Posts', to: '/admin/blog', icon: <FileText className="w-5 h-5" /> },
   { label: 'Testimonials', to: '/admin/testimonials', icon: <Quote className="w-5 h-5" /> },

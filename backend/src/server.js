@@ -50,6 +50,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 import enrollmentRoutes from './routes/enrollment.routes.js';
 app.use('/api/enrollments', enrollmentRoutes);
+import certificateRoutes from './routes/certificate.routes.js';
+app.use('/api/certificates', certificateRoutes);
 import exportRoutes from './routes/export.routes.js';
 app.use('/api/export', exportRoutes);
 import paymentRoutes from './routes/payment.routes.js';
