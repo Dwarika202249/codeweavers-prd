@@ -13,6 +13,7 @@ export default function TimelineItem({ experience, isLast = false, className }: 
     industry: 'info',
     teaching: 'success',
     mentoring: 'warning',
+    internship: 'teal',
   } as const;
 
   return (

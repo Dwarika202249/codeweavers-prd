@@ -125,38 +125,72 @@ export default function AboutPage() {
             subtitle="Real-world experience that informs every lesson I teach"
           />
           
-          <div className="mt-12 rounded-xl border border-gray-800 bg-gray-900 p-8">
-            <h3 className="text-xl font-semibold text-white">Software Engineer & Analyst @ HCLTech</h3>
-            <p className="mt-1 text-indigo-400">2022 - Present</p>
-            
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="space-y-3">
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  Frontend-heavy applications with React, TypeScript, Redux
-                </p>
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  Backend collaboration using Node.js, Express, REST APIs
-                </p>
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  Microservices-based architecture exposure
-                </p>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            <div className="rounded-xl border border-gray-800 bg-gray-900 p-8">
+              <h3 className="text-xl font-semibold text-white">Software Engineer & Analyst @ HCLTech</h3>
+              <p className="mt-1 text-indigo-400">Oct 2022 - Oct 2025</p>
+              
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Frontend-heavy applications with React, TypeScript, Redux</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Backend collaboration using Node.js, Express, REST APIs</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Microservices-based architecture exposure</span>
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">MongoDB and MySQL database experience</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Real-world debugging and production issues</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Cloud fundamentals (AWS/Azure)</span>
+                  </p>
+                </div>
               </div>
-              <div className="space-y-3">
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  MongoDB and MySQL database experience
-                </p>
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  Real-world debugging and production issues
-                </p>
-                <p className="text-gray-300">
-                  <span className="mr-2 text-indigo-400">→</span>
-                  Cloud fundamentals (AWS/Azure)
-                </p>
+            </div>
+
+            <div className="rounded-xl border border-gray-800 bg-gray-900 p-8">
+              <h3 className="text-xl font-semibold text-white">Full Stack Java Intern @ Cognizant</h3>
+              <p className="mt-1 text-indigo-400">Feb 2022 - Jul 2022</p>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Developed backend APIs using Java and Spring Boot</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Integrated frontend components and assisted in bug fixes</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Collaborated with cross-functional teams and participated in code reviews</span>
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Gained practical exposure to software development lifecycle and enterprise practices</span>
+                  </p>
+                  <p className="text-gray-300 flex gap-2">
+                    <span className="text-indigo-400 self-start">→</span>
+                    <span className="flex-1">Worked with testing, debugging and CI/CD pipelines</span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>

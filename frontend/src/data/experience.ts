@@ -2,10 +2,24 @@ import type { Experience, Stat } from '../types';
 
 export const experiences: Experience[] = [
   {
+    id: '4',
+    title: 'Full Stack Java Intern',
+    organization: 'Cognizant',
+    period: 'Feb 2022 - Jul 2022',
+    description: 'Internship focusing on Java-based backend development and full-stack integration, working with Java, Spring Boot, and frontend components.',
+    highlights: [
+      'Developed backend APIs using Java and Spring Boot',
+      'Integrated frontend components and assisted in bug fixes',
+      'Collaborated with cross-functional teams and participated in code reviews',
+      'Gained practical exposure to software development lifecycle and enterprise practices',
+    ],
+    type: 'internship',
+  },
+  {
     id: '1',
     title: 'Software Engineer & Analyst',
     organization: 'HCLTech',
-    period: '2022 - Present',
+    period: 'Oct 2022 - Oct 2025',
     description: 'Working on enterprise-level frontend applications with React, TypeScript, and modern web technologies.',
     highlights: [
       'Built and maintained React applications with TypeScript and Redux',
@@ -19,7 +33,7 @@ export const experiences: Experience[] = [
     id: '2',
     title: 'Tech Mentor & Trainer',
     organization: 'Freelance / Personal',
-    period: '2020 - Present',
+    period: '2020 - 2025',
     description: 'Providing practical tech training to college students and aspiring developers.',
     highlights: [
       'Mentored 50+ students in web development',

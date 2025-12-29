@@ -44,7 +44,7 @@ export interface Experience {
   period: string;
   description: string;
   highlights: string[];
-  type: 'industry' | 'teaching' | 'mentoring';
+  type: 'industry' | 'teaching' | 'mentoring' | 'internship';
 }
 
 // Contact form types

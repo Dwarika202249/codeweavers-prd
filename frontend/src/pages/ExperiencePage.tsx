@@ -31,6 +31,7 @@ export default function ExperiencePage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <span className={cn(
                       'rounded-full px-3 py-1 text-xs font-medium',
+                      exp.type === 'internship' && 'bg-teal-900/50 text-teal-400',
                       exp.type === 'industry' && 'bg-blue-900/50 text-blue-400',
                       exp.type === 'teaching' && 'bg-green-900/50 text-green-400',
                       exp.type === 'mentoring' && 'bg-purple-900/50 text-purple-400'
