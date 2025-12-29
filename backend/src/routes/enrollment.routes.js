@@ -203,6 +203,38 @@ router.post(
 );
 
 /**
+ * POST /api/enrollments/:id/notes
+ * Add an admin note to an enrollment (admin only)
+ */
+router.post(
+  '/:id/notes',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      res.status(404);
+      throw new Error('Enrollment not found');
+    }
+
+    const { note } = req.body;
+    if (!note || typeof note !== 'string' || note.trim() === '') {
+      res.status(400);
+      throw new Error('Note is required');
+    }
+
+    enrollment.adminNotes = enrollment.adminNotes || [];
+    enrollment.adminNotes.push({ note: note.trim(), addedBy: req.user._id, createdAt: new Date() });
+    await enrollment.save();
+
+    // populate addedBy for the notes before returning
+    await enrollment.populate({ path: 'adminNotes.addedBy', select: 'name email' });
+
+    res.status(201).json({ success: true, data: { enrollment } });
+  })
+);
+
+/**
  * POST /api/enrollments/:id/request-refund
  * mark refund requested (simple placeholder)
  */

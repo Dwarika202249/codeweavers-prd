@@ -33,6 +33,8 @@ const UserSettingsPage = lazy(() => import('../pages/dashboard/UserSettingsPage'
 const EnrollmentDetailsPage = lazy(() => import('../pages/dashboard/EnrollmentDetailsPage'));
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'));
 const AdminAuditsPage = lazy(() => import('../pages/admin/AdminAuditsPage'));
+const AdminEnrollmentsPage = lazy(() => import('../pages/admin/AdminEnrollmentsPage'));
+const AdminEnrollmentDetailPage = lazy(() => import('../pages/admin/AdminEnrollmentDetailPage'));
 const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
 export const router = createBrowserRouter([
   {
@@ -150,6 +152,12 @@ export const router = createBrowserRouter([
       },
       {        path: 'courses',
         element: <LazyPage><CoursesPage /></LazyPage>,
+      },
+      {        path: 'enrollments',
+        element: <LazyPage><AdminEnrollmentsPage /></LazyPage>,
+      },
+      {        path: 'enrollments/:id',
+        element: <LazyPage><AdminEnrollmentDetailPage /></LazyPage>,
       },
       {
         path: 'courses/new',

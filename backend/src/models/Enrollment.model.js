@@ -4,7 +4,7 @@ const enrollmentSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
-    status: { type: String, enum: ['enrolled', 'interest', 'completed', 'cancelled'], default: 'enrolled' },
+    status: { type: String, enum: ['enrolled', 'pending', 'interest', 'completed', 'cancelled'], default: 'enrolled' },
     progress: { type: Number, min: 0, max: 100, default: 0 },
 
     // Payment & transactions
@@ -32,6 +32,15 @@ const enrollmentSchema = new mongoose.Schema(
         notes: { type: String },
         grade: { type: String },
         feedback: { type: String },
+      },
+    ],
+
+    // Admin notes for internal tracking and actions
+    adminNotes: [
+      {
+        note: { type: String, required: true },
+        addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date, default: Date.now },
       },
     ],
 
