@@ -130,6 +130,11 @@
   outline-offset: 2px;
 }
 
+/* Always show vertical scrollbar to prevent layout shift when content height changes */
+html {
+  overflow-y: scroll;
+}
+
 /* Hide focus ring when not using keyboard */
 :focus:not(:focus-visible) {
   outline: none;

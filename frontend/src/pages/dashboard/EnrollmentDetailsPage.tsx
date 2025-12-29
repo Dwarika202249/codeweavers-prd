@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { enrollmentAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EnrollmentDetailsPage() {
   const { id } = useParams<{ id?: string }>();
@@ -12,6 +13,11 @@ export default function EnrollmentDetailsPage() {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState('');
+  const [openModules, setOpenModules] = useState<number[]>([]);
+
+  const toggleModule = (index: number) => {
+    setOpenModules((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]));
+  }; 
 
   useEffect(() => {
     if (!id) return;
@@ -84,36 +90,86 @@ export default function EnrollmentDetailsPage() {
           <div className="mt-3 space-y-2">
             {(course.curriculum || []).map((m: any, i: number) => {
               const topics: string[] = Array.isArray(m.topics) ? m.topics : [];
+              const completedCount = topics.filter((t) => (enrollment.completedLessons || []).some((c: any) => c.moduleIndex === i && c.topic === t)).length;
+              const moduleProgress = topics.length ? Math.round((completedCount / topics.length) * 100) : 0;
+              const isOpen = openModules.includes(i);
+              const moduleId = `module-${i}`;
+
               return (
-                <div key={i} className="p-3 rounded border border-gray-700 bg-gray-900">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <div className="font-medium text-white">{m.title || `Week ${m.week || i+1}`}</div>
-                      <div className="mt-2 space-y-2">
-                        {topics.map((t, ti) => {
-                          const completed = (enrollment.completedLessons || []).some((c: any) => c.moduleIndex === i && c.topic === t);
-                          return (
-                            <div key={ti} className="flex items-center justify-between p-2 rounded bg-gray-900 border border-gray-800">
-                              <div className="flex items-center gap-3">
-                                <input aria-label={`Complete ${t}`} type="checkbox" checked={completed} onChange={async () => {
-                                  try {
-                                    await enrollmentAPI.completeLesson(id!, { moduleIndex: i, topic: t });
-                                    const updated = await enrollmentAPI.getById(id!);
-                                    setEnrollment(updated.data.data.enrollment);
-                                  } catch (err: any) {
-                                    setError(err.message || 'Failed');
-                                  }
-                                }} />
-                                <div className="text-sm text-gray-300">{t}</div>
-                              </div>
-                              <div className="text-xs text-gray-400">{completed ? 'Done' : 'Not started'}</div>
-                            </div>
-                          );
-                        })}
+                <div key={i} className="rounded border border-gray-700 bg-gray-900 overflow-hidden">
+                  {isOpen ? (
+                    <button
+                      onClick={() => toggleModule(i)}
+                      aria-expanded="true"
+                      className="w-full text-left px-4 py-3 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-white truncate">{m.title || `Week ${m.week || i+1}`}</div>
+                        <div className="text-xs text-gray-400 truncate">{topics.length} topics</div>
                       </div>
-                    </div>
-                    <div className="text-sm text-gray-300 whitespace-nowrap shrink-0">{(enrollment.progress || 0)}%</div>
-                  </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="text-xs text-gray-400">{topics.length}</div>
+                        <div className={`px-2 py-0.5 rounded text-xs font-medium ${moduleProgress === 100 ? 'bg-green-700 text-green-200' : moduleProgress === 0 ? 'bg-gray-700 text-gray-300' : 'bg-yellow-700 text-yellow-200'}`}>{moduleProgress}%</div>
+                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => toggleModule(i)}
+                      aria-expanded="false"
+                      className="w-full text-left px-4 py-3 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-white truncate">{m.title || `Week ${m.week || i+1}`}</div>
+                        <div className="text-xs text-gray-400 truncate">{topics.length} topics</div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="text-xs text-gray-400">{topics.length}</div>
+                        <div className={`px-2 py-0.5 rounded text-xs font-medium ${moduleProgress === 100 ? 'bg-green-700 text-green-200' : moduleProgress === 0 ? 'bg-gray-700 text-gray-300' : 'bg-yellow-700 text-yellow-200'}`}>{moduleProgress}%</div>
+                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+                  )}
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={moduleId}
+                        className="px-4 py-3 border-t border-gray-800 space-y-2 overflow-hidden"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.18, ease: 'easeInOut' }}
+                      >
+                        {topics.length === 0 ? (
+                          <div className="text-gray-400">No topics</div>
+                        ) : (
+                          topics.map((t, ti) => {
+                            const completed = (enrollment.completedLessons || []).some((c: any) => c.moduleIndex === i && c.topic === t);
+                            return (
+                              <div key={ti} className="flex items-center justify-between p-2 rounded bg-gray-900 border border-gray-800">
+                                <div className="flex items-center gap-3">
+                                  <input aria-label={`Complete ${t}`} type="checkbox" checked={completed} onChange={async () => {
+                                    try {
+                                      await enrollmentAPI.completeLesson(id!, { moduleIndex: i, topic: t });
+                                      const updated = await enrollmentAPI.getById(id!);
+                                      setEnrollment(updated.data.data.enrollment);
+                                    } catch (err: any) {
+                                      setError(err.message || 'Failed');
+                                    }
+                                  }} />
+                                  <div className="text-sm text-gray-300">{t}</div>
+                                </div>
+                                <div className="text-xs text-gray-400">{completed ? 'Done' : 'Not started'}</div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}
