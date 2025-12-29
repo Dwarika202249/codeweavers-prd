@@ -237,7 +237,7 @@ router.get(
     if (status) filter.status = status;
 
     const [submissions, total] = await Promise.all([
-      Submission.find(filter).populate('student', 'name email').populate('enrollment', 'course').sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+      Submission.find(filter).populate('student', 'name email avatar').populate('enrollment', 'course').sort({ createdAt: -1 }).skip(skip).limit(limitNum),
       Submission.countDocuments(filter),
     ]);
 
@@ -256,7 +256,7 @@ router.patch(
   protect,
   adminOnly,
   asyncHandler(async (req, res) => {
-    const submission = await Submission.findById(req.params.id).populate('student', 'name email');
+    const submission = await Submission.findById(req.params.id).populate('student', 'name email avatar');
     if (!submission) {
       res.status(404);
       throw new Error('Submission not found');

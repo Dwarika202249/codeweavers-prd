@@ -91,7 +91,11 @@ export default function AdminEnrollmentsPage() {
         {enrollments.filter(e => !statusFilter || e.status === statusFilter).map((e) => (
           <div key={e._id} className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(e.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
+              {e.user?.avatar ? (
+                <img src={e.user.avatar} alt={e.user?.name || 'User avatar'} className="w-12 h-12 rounded-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(e.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
+              )}
 
               <div>
                 <div className="font-semibold text-white">{e.user?.name}</div>

@@ -15,7 +15,7 @@ router.get(
   '/:id/download',
   protect,
   asyncHandler(async (req, res) => {
-    const certificate = await Certificate.findById(req.params.id).populate('student', 'name email');
+    const certificate = await Certificate.findById(req.params.id).populate('student', 'name email avatar');
     if (!certificate) {
       res.status(404);
       throw new Error('Certificate not found');

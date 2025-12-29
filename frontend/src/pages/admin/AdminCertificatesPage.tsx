@@ -65,7 +65,11 @@ export default function AdminCertificatesPage() {
         {certificates.map((c) => (
           <div key={c._id} className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(c.student?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
+              {c.student?.avatar ? (
+                <img src={c.student.avatar} alt={c.student?.name || 'User avatar'} className="w-12 h-12 rounded-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(c.student?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
+              )}
               <div>
                 <div className="font-semibold text-white">{c.student?.name}</div>
                 <div className="text-xs text-gray-400">{c.student?.email}</div>

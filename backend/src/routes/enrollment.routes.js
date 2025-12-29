@@ -89,7 +89,7 @@ router.get(
     if (req.user.role === 'admin') {
       const [enrollments, total] = await Promise.all([
         Enrollment.find()
-          .populate('user', 'name email')
+          .populate('user', 'name email avatar')
           .populate('course', 'title shortDescription slug')
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -425,7 +425,7 @@ router.get(
     try {
       const [certificates, total] = await Promise.all([
         Certificate.find(filter)
-          .populate('student', 'name email')
+          .populate('student', 'name email avatar')
           .populate({ path: 'enrollment', populate: { path: 'course', select: 'title' } })
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -478,6 +478,7 @@ router.get(
   protect,
   asyncHandler(async (req, res) => {
     const certificates = await Certificate.find({ student: req.user._id })
+      .populate('student', 'name email avatar')
       .populate({ path: 'enrollment', populate: { path: 'course', select: 'title' } })
       .sort({ createdAt: -1 });
 
@@ -494,7 +495,7 @@ router.get(
   adminOnly,
   asyncHandler(async (req, res) => {
     const certificate = await Certificate.findById(req.params.id)
-      .populate('student', 'name email')
+      .populate('student', 'name email avatar')
       .populate({ path: 'enrollment', populate: { path: 'course', select: 'title' } });
 
     if (!certificate) {
@@ -572,7 +573,7 @@ router.get(
   protect,
   asyncHandler(async (req, res) => {
     const enrollment = await Enrollment.findById(req.params.id)
-      .populate('user', 'name email')
+      .populate('user', 'name email avatar')
       .populate('course', 'title shortDescription slug curriculum coverImage instructor');
 
     if (!enrollment) {

@@ -155,9 +155,13 @@ export default function AdminCertificateDetailPage() {
 
       <div className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-5 border border-gray-700">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-            {(certificate.student?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}
-          </div>
+          {certificate.student?.avatar ? (
+            <img src={certificate.student.avatar} alt={certificate.student?.name || 'Student avatar'} className="w-14 h-14 rounded-full object-cover text-white font-bold text-lg" />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+              {(certificate.student?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}
+            </div>
+          )}
           <div className="flex-1">
             <div className="text-sm text-gray-400">Student</div>
             <div className="font-semibold text-white">{certificate.student?.name}</div>

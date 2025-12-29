@@ -75,9 +75,13 @@ export default function AdminEnrollmentDetailPage() {
       <div className="bg-linear-to-r from-gray-900 via-gray-800 to-gray-900 rounded-lg p-5 border border-gray-700">
         <div className="flex items-start gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow">
-              {(enrollment.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}
-            </div>
+            {enrollment.user?.avatar ? (
+              <img src={enrollment.user.avatar} alt={enrollment.user?.name || 'Student avatar'} className="w-14 h-14 rounded-full object-cover shadow" />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow">
+                {(enrollment.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}
+              </div>
+            )}
             <div>
               <div className="text-sm text-gray-400">Student</div>
               <div className="font-semibold text-white">{enrollment.user?.name}</div>
