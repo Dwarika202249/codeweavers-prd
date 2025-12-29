@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminCertificatesAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { showError } from '../../lib/toastUtils';
 
@@ -12,6 +12,16 @@ export default function AdminCertificatesPage() {
   const [limit] = useState(20);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+
+  const statusClass = (s?: string) => {
+    switch ((s || '').toLowerCase()) {
+      case 'issued': return 'bg-green-600 text-green-50';
+      case 'rejected': return 'bg-red-600 text-red-50';
+      case 'requested': return 'bg-yellow-600 text-yellow-900';
+      case 'revoked': return 'bg-gray-600 text-white';
+      default: return 'bg-gray-700 text-white';
+    }
+  }; 
 
   const fetch = async () => {
     setLoading(true);
@@ -53,17 +63,20 @@ export default function AdminCertificatesPage() {
 
       <div className="space-y-3">
         {certificates.map((c) => (
-          <div key={c._id} className="bg-gray-800 rounded p-3 border border-gray-700">
-            <div className="flex items-center justify-between">
+          <div key={c._id} className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(c.student?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
               <div>
-                <div className="font-medium text-white">{c.student?.name} — <span className="text-gray-400">{c.student?.email}</span></div>
-                <div className="text-sm text-gray-400">Course: {c.enrollment?.course?.title}</div>
-                <div className="text-sm text-gray-400">Requested: {new Date(c.requestAt).toLocaleString()}</div>
+                <div className="font-semibold text-white">{c.student?.name}</div>
+                <div className="text-xs text-gray-400">{c.student?.email}</div>
+                <div className="text-xs text-gray-400 mt-1">Course: <span className="text-indigo-300">{c.enrollment?.course?.title}</span></div>
+                <div className="text-xs text-gray-500 mt-1 flex items-center gap-2"><Calendar className="w-3 h-3" /> {new Date(c.requestAt).toLocaleString()}</div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className={`text-sm ${c.status === 'issued' ? 'text-green-300' : c.status === 'rejected' ? 'text-red-400' : 'text-yellow-300'}`}>{c.status}</div>
-                <Link to={`/admin/certificates/${c._id}`} className="px-2 py-1 rounded bg-gray-700 text-white text-sm">View</Link>
-              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className={`${statusClass(c.status)} px-3 py-1 rounded-full text-xs font-medium`}>{c.status}</span>
+              <Link to={`/admin/certificates/${c._id}`} className="px-3 py-1 rounded bg-indigo-600 text-white text-sm">View</Link>
             </div>
           </div>
         ))}
