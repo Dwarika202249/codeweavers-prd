@@ -4,6 +4,7 @@ import { Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { userAdminAPI, contactAPI } from '../../lib/api';
 import SEO from '../../components/SEO';
+import ReactApexChart from 'react-apexcharts';
 
 const stats = [
   { 
@@ -56,6 +57,18 @@ export default function AdminDashboard() {
   const [pageTitle, setPageTitle] = useState('Admin Dashboard');
   const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
 
+  const [trendData, setTrendData] = useState<{ categories: string[]; series: any[] } | null>(null);
+  const [enrollmentsTrend, setEnrollmentsTrend] = useState<{ categories: string[]; series: any[] } | null>(null);
+
+  const chartOptions = (data: { categories: string[] } | null, color = '#60A5FA') => data ? {
+    chart: { id: 'chart', toolbar: { show: false }, zoom: { enabled: false } },
+    xaxis: { categories: data.categories, labels: { rotate: -45, style: { colors: '#9CA3AF' } } },
+    grid: { strokeDashArray: 4 },
+    stroke: { curve: 'smooth', width: 2 },
+    colors: [color],
+    tooltip: { x: { format: 'yyyy-MM-dd' } },
+  } : {} as any;
+
   // Helper to display relative time (e.g., "2 hours ago")
   const timeAgo = (input?: string | number | Date) => {
     if (!input) return '';
@@ -76,12 +89,67 @@ export default function AdminDashboard() {
     const years = Math.floor(months / 12);
     return `${years} year${years === 1 ? '' : 's'} ago`;
   };
-
   useEffect(() => {
     if (statsData && typeof statsData.total === 'number') {
       setPageTitle(`Admin Dashboard — ${statsData.total} users`);
     }
   }, [statsData]);
+
+  // Per-chart range state and fetchers (defaults = 7 days)
+  const [newUsersDaysRange, setNewUsersDaysRange] = useState<number>(7);
+  const [enrollmentsDaysRange, setEnrollmentsDaysRange] = useState<number>(7);
+  const [topCoursesDaysRange, setTopCoursesDaysRange] = useState<number>(7);
+  const [topCourses, setTopCourses] = useState<any[] | null>(null);
+
+  // Revenue chart state
+  const [revenueTrend, setRevenueTrend] = useState<{ categories: string[]; series: any[] } | null>(null);
+  const [revenueDaysRange, setRevenueDaysRange] = useState<number>(7);
+
+  const fetchNewUsers = async (days: number) => {
+    try {
+      const res = await userAdminAPI.newUsersTrend({ days });
+      const daysArr = res.data.data.days || [];
+      setTrendData({ categories: daysArr.map((d: any) => d.date), series: [{ name: 'New Users', data: daysArr.map((d: any) => d.count) }] });
+    } catch (err) {
+      console.warn('Failed to fetch new users trend', err);
+    }
+  };
+
+  const fetchEnrollments = async (days: number) => {
+    try {
+      const res = await (await import('../../lib/api')).enrollmentAPI.dailyTrend({ days });
+      const daysArr = res.data.data.days || [];
+      setEnrollmentsTrend({ categories: daysArr.map((d: any) => d.date), series: [{ name: 'Enrollments', data: daysArr.map((d: any) => d.count) }] });
+    } catch (err) {
+      console.warn('Failed to fetch enrollments trend', err);
+    }
+  };
+
+  const fetchTopCourses = async (days: number) => {
+    try {
+      const res = await (await import('../../lib/api')).courseAPI.topByEnrollments({ days, limit: 8 });
+      const top = res.data.data.top || [];
+      setTopCourses(top);
+    } catch (err) {
+      console.warn('Failed to fetch top courses', err);
+    }
+  };
+
+  const fetchRevenue = async (days: number) => {
+    try {
+      const res = await (await import('../../lib/api')).paymentsAPI.revenueTrend({ days });
+      const daysArr = res.data.data.days || [];
+      setRevenueTrend({ categories: daysArr.map((d: any) => d.date), series: [{ name: 'Revenue', data: daysArr.map((d: any) => d.revenue) }] });
+    } catch (err) {
+      console.warn('Failed to fetch revenue trend', err);
+    }
+  };
+
+  // Per-chart effects: run on mount and when ranges / course filter change
+  useEffect(() => { fetchNewUsers(newUsersDaysRange); }, [newUsersDaysRange]);
+  useEffect(() => { fetchEnrollments(enrollmentsDaysRange); }, [enrollmentsDaysRange]);
+  useEffect(() => { fetchTopCourses(topCoursesDaysRange); }, [topCoursesDaysRange]);
+  useEffect(() => { fetchRevenue(revenueDaysRange); }, [revenueDaysRange]);
 
   useEffect(() => {
     userAdminAPI.stats()
@@ -100,6 +168,8 @@ export default function AdminDashboard() {
         console.warn('Failed to fetch recent inquiries', err);
       }
     })();
+
+
 
     return () => { mounted = false; };
   }, []);
@@ -144,6 +214,166 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-400">{stat.label}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Charts Grid (2 per row on large screens) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* New Users Trend */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-white">New users</h2>
+            <div className="text-sm text-gray-400">Last {newUsersDaysRange} days</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-400">Range:</div>
+            {[7,30,90].map((d) => (
+              <button
+                key={d}
+                onClick={() => setNewUsersDaysRange(d)}
+                className={`text-sm px-2 py-1 rounded ${newUsersDaysRange===d ? 'bg-indigo-600 text-white' : 'text-gray-400 bg-gray-700/30'}`}
+              >{d}d</button>
+            ))}
+
+          </div>
+        </div>
+        <div className="w-full h-48">
+          {trendData ? (
+            <ReactApexChart options={chartOptions(trendData)} series={trendData.series} type="area" height={180} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">Loading chart…</div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Enrollments Trend */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.38 }}
+        className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-white">Enrollments</h2>
+            <div className="text-sm text-gray-400">Last {enrollmentsDaysRange} days</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-400">Range:</div>
+            {[7,30,90].map((d) => (
+              <button
+                key={d}
+                onClick={() => setEnrollmentsDaysRange(d)}
+                className={`text-sm px-2 py-1 rounded ${enrollmentsDaysRange===d ? 'bg-indigo-600 text-white' : 'text-gray-400 bg-gray-700/30'}`}
+              >{d}d</button>
+            ))}
+          </div>
+        </div>
+        <div className="w-full h-48">
+          {enrollmentsTrend ? (
+            <ReactApexChart options={chartOptions(enrollmentsTrend, '#34D399')} series={enrollmentsTrend.series} type="area" height={180} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">Loading chart…</div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Revenue Trend */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.385 }}
+        className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-white">Revenue</h2>
+            <div className="text-sm text-gray-400">Last {revenueDaysRange} days</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-400">Range:</div>
+            {[7,30,90].map((d) => (
+              <button
+                key={d}
+                onClick={() => setRevenueDaysRange(d)}
+                className={`text-sm px-2 py-1 rounded ${revenueDaysRange===d ? 'bg-indigo-600 text-white' : 'text-gray-400 bg-gray-700/30'}`}
+              >{d}d</button>
+            ))}
+          </div>
+        </div>
+        <div className="w-full h-48">
+          {revenueTrend ? (
+            <ReactApexChart
+              options={{
+                ...chartOptions(revenueTrend, '#F59E0B'),
+                yaxis: [{ labels: { formatter: (val: number) => `₹${Number(val).toLocaleString()}` } }],
+                tooltip: { y: { formatter: (val: number) => `₹${Number(val).toLocaleString()}` } },
+              }}
+              series={revenueTrend.series}
+              type="area"
+              height={180}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">Loading revenue…</div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Top Courses by Enrollments */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.37 }}
+        className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+      >        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-white">Top courses</h2>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-400">Last {topCoursesDaysRange} days</div>
+            {[7,30,90].map((d) => (
+              <button
+                key={d}
+                onClick={() => setTopCoursesDaysRange(d)}
+                className={`text-sm px-2 py-1 rounded ${topCoursesDaysRange===d ? 'bg-indigo-600 text-white' : 'text-gray-400 bg-gray-700/30'}`}
+              >{d}d</button>
+            ))}
+          </div>
+        </div>
+        <div className="w-full h-48">
+          {topCourses ? (
+            <ReactApexChart
+              options={{
+                chart: { id: 'top-courses', toolbar: { show: false } },
+                plotOptions: { bar: { horizontal: true } },
+                xaxis: { labels: { style: { colors: '#9CA3AF' } } },
+              }}
+              series={[{ name: 'Enrollments', data: topCourses.map((t: any) => t.count) }]}
+              type="bar"
+              height={220}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">Loading top courses…</div>
+          )}
+        </div>
+        <div className="mt-5 grid grid-cols-1 gap-2">
+          {topCourses && topCourses.map((t: any) => (
+            <div
+              key={t.courseId}
+              className="w-full text-left text-sm px-3 py-2 rounded bg-gray-700/30 text-gray-300"
+              title={`${t.title || 'Course'} — ${t.count} enrollments`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="truncate">{t.title || t.slug || t.courseId}</div>
+                <div className="text-xs text-gray-400">{t.count}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
       </div>
 
       {/* Recent Inquiries */}

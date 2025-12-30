@@ -1,5 +1,6 @@
 import express from 'express';
 import Course from '../models/Course.model.js';
+import Enrollment from '../models/Enrollment.model.js';
 import slugify from 'slugify';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { protect, adminOnly } from '../middleware/auth.middleware.js';
@@ -154,5 +155,36 @@ router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   await course.remove();
   res.json({ success: true, message: 'Course deleted' });
 }));
+
+/**
+ * @route   GET /api/courses/stats/top-enrollments
+ * @desc    Get top courses by enrollment count in the last N days (default 30)
+ * @access  Private/Admin
+ */
+router.get(
+  '/stats/top-enrollments',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const days = Math.max(1, Math.min(365, parseInt(req.query.days) || 30));
+    const limit = Math.max(1, Math.min(50, parseInt(req.query.limit) || 10));
+
+    const start = new Date();
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0,0,0,0);
+
+    const agg = await Enrollment.aggregate([
+      { $match: { createdAt: { $gte: start } } },
+      { $group: { _id: '$course', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: limit },
+      { $lookup: { from: 'courses', localField: '_id', foreignField: '_id', as: 'course' } },
+      { $unwind: { path: '$course', preserveNullAndEmptyArrays: true } },
+      { $project: { courseId: '$_id', count: 1, title: '$course.title', slug: '$course.slug' } },
+    ]);
+
+    res.json({ success: true, data: { top: agg } });
+  })
+);
 
 export default router;

@@ -4,7 +4,7 @@ import config from '../config/index.js';
 import Course from '../models/Course.model.js';
 import Enrollment from '../models/Enrollment.model.js';
 import { asyncHandler } from '../middleware/error.middleware.js';
-import { protect } from '../middleware/auth.middleware.js';
+import { protect, adminOnly } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 const stripe = new Stripe(config.stripeSecretKey, { apiVersion: '2022-11-15' });
@@ -222,5 +222,45 @@ router.get('/session/:id', protect, asyncHandler(async (req, res) => {
 
   res.json({ success: true, data: { session, enrollmentCreated } });
 }));
+
+
+/**
+ * @route   GET /api/payments/stats/revenue
+ * @desc    Get daily revenue (sum of pricePaid) for the last N days (default 30). Admin only
+ * @access  Private/Admin
+ */
+router.get(
+  '/stats/revenue',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const days = Math.max(1, Math.min(365, parseInt(req.query.days) || 30));
+    const start = new Date();
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0,0,0,0);
+
+    const agg = await Enrollment.aggregate([
+      { $match: { paymentStatus: 'paid', pricePaid: { $gt: 0 }, createdAt: { $gte: start } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, revenue: { $sum: "$pricePaid" }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const map = {};
+    agg.forEach((a) => { map[a._id] = { revenue: a.revenue, count: a.count }; });
+
+    const daysArr = [];
+    const today = new Date();
+    today.setUTCHours(0,0,0,0);
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0,10);
+      const val = map[key] || { revenue: 0, count: 0 };
+      daysArr.push({ date: key, revenue: Number((val.revenue || 0).toFixed(2)), count: val.count });
+    }
+
+    res.json({ success: true, data: { days: daysArr } });
+  })
+);
 
 export default router;

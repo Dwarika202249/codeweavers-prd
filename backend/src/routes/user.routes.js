@@ -289,6 +289,44 @@ router.get(
   })
 );
 
+/**
+ * @route   GET /api/users/stats/new-users-trend
+ * @desc    Get new users count per day for the last N days (default 30)
+ * @access  Private/Admin
+ */
+router.get(
+  '/stats/new-users-trend',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const days = Math.max(7, Math.min(90, parseInt(req.query.days) || 30));
+    const start = new Date();
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0, 0, 0, 0);
+
+    const agg = await User.aggregate([
+      { $match: { createdAt: { $gte: start } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const map = {};
+    agg.forEach((a) => { map[a._id] = a.count; });
+
+    const daysArr = [];
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      daysArr.push({ date: key, count: map[key] || 0 });
+    }
+
+    res.json({ success: true, data: { days: daysArr } });
+  })
+);
+
 
 /**
  * @route   GET /api/users/audits

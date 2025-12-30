@@ -227,6 +227,51 @@ router.post(
 );
 
 /**
+ * @route   GET /api/enrollments/stats/daily
+ * @desc    Get daily enrollments count for the last N days (default 30). Optional filter: courseId
+ * @access  Private/Admin
+ */
+router.get(
+  '/stats/daily',
+  protect,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const days = Math.max(7, Math.min(90, parseInt(req.query.days) || 30));
+    const courseId = req.query.courseId;
+    const start = new Date();
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0,0,0,0);
+
+    const match = { createdAt: { $gte: start } };
+    if (courseId) match.course = typeof courseId === 'string' ? new (await import('mongoose')).Types.ObjectId(courseId) : courseId;
+
+    const agg = await Enrollment.aggregate([
+      { $match: match },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const map = {};
+    agg.forEach((a) => { map[a._id] = a.count; });
+
+    const daysArr = [];
+    const today = new Date();
+    today.setUTCHours(0,0,0,0);
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0,10);
+      daysArr.push({ date: key, count: map[key] || 0 });
+    }
+
+    res.json({ success: true, data: { days: daysArr } });
+  })
+);
+
+    // populate addedBy for the notes before returning
+    // (already handled earlier) 
+
+/**
  * POST /api/enrollments/:id/complete
  * Mark a lesson/topic as completed (owner or admin)
  */

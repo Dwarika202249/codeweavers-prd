@@ -225,6 +225,7 @@ export const courseAPI = {
   update: (id: string, data: Partial<Course>) =>
     api.put<{ success: boolean; data: { course: Course } }>(`/courses/${id}`, data),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/courses/${id}`),
+  topByEnrollments: (params?: { days?: number; limit?: number }) => api.get<{ success: boolean; data: { top: { courseId: string; count: number; title?: string; slug?: string }[] } }>(`/courses/stats/top-enrollments`, { params }),
 };
 
 // Uploads
@@ -236,6 +237,7 @@ export const uploadsAPI = {
 export const paymentsAPI = {
   createCheckoutSession: (data: { courseId?: string; courseSlug?: string }) => api.post<{ success: boolean; data: { url?: string; id?: string } }>(`/payments/create-checkout-session`, data),
   getSession: (id: string) => api.get<{ success: boolean; data: { session: any } }>(`/payments/session/${id}`),
+  revenueTrend: (params?: { days?: number }) => api.get<{ success: boolean; data: { days: { date: string; revenue: number; count: number }[] } }>(`/payments/stats/revenue`, { params }),
 };
 
 export const enrollmentAPI = {
@@ -244,6 +246,7 @@ export const enrollmentAPI = {
   getMy: () => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments'),
   getAll: (params?: { page?: number; limit?: number }) => api.get<{ success: boolean; data: { enrollments: any[] } }>('/enrollments', { params }),
   getById: (id: string) => api.get<{ success: boolean; data: { enrollment: any } }>(`/enrollments/${id}`),
+  dailyTrend: (params?: { days?: number; courseId?: string }) => api.get<{ success: boolean; data: { days: { date: string; count: number }[] } }>(`/enrollments/stats/daily`, { params }),
   getCertificate: (id: string) => api.get<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificate`),
   applyCertificate: (id: string, data?: { note?: string }) => api.post<{ success: boolean; data: { certificate: any } }>(`/enrollments/${id}/certificates`, data),
   getMyCertificates: () => api.get<{ success: boolean; data: { certificates: any[] } }>(`/enrollments/certificates/my`),
@@ -271,6 +274,7 @@ export const userAdminAPI = {
   updateStatus: (id: string, isActive: boolean) => api.put<{ success: boolean; data: { user: any } }>(`/users/${id}/status`, { isActive }),
   remove: (id: string) => api.delete<{ success: boolean; message: string }>(`/users/${id}`),
   stats: () => api.get<{ success: boolean; data: { stats: any } }>(`/users/stats/summary`),
+  newUsersTrend: (params?: { days?: number }) => api.get<{ success: boolean; data: { days: { date: string; count: number }[] } }>(`/users/stats/new-users-trend`, { params }),
   // Server-side export (streamed as CSV)
   exportUsers: (params?: { search?: string; role?: string; isActive?: boolean; from?: string; to?: string; limit?: number }) =>
     api.get(`/export/users`, { params, responseType: 'blob' }),
