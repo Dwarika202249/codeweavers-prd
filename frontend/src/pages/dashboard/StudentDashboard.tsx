@@ -121,7 +121,7 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <h3 className="font-medium text-white truncate">{e.course?.title || 'Course'}</h3>
-                    <div className="text-xs text-gray-400 truncate">{e.course?.shortDescription}</div>
+                    <div className="text-xs text-gray-400 whitespace-normal">{e.course?.shortDescription}</div>
                   </div>
                   <div className="w-full sm:w-40 md:w-48 mt-3 sm:mt-0 flex-none">
                     <progress value={Math.min(100, Math.max(0, Number(e.progress) || 0))} max={100} className="w-full h-2 rounded appearance-none" />
