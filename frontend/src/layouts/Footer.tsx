@@ -1,9 +1,32 @@
 import { Link } from 'react-router-dom';
 import { Code2, Mail, MapPin, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { footerLinks } from '../data/navigation';
+import { courseAPI, type Course } from '../lib/api';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const [popularCourses, setPopularCourses] = useState<Course[] | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    courseAPI.getAll({ page: 1, limit: 8 })
+      .then((res) => {
+        if (!mounted) return;
+        const courses: Course[] = res.data.data.courses || [];
+        // Prefer featured courses; otherwise use first results
+        const featured = courses.filter((c) => Boolean(c.featured));
+        const chosen = (featured.length ? featured : courses).slice(0, 4);
+        setPopularCourses(chosen);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setPopularCourses([]);
+      });
+
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <footer className="border-t border-gray-800 bg-gray-900" role="contentinfo">
@@ -66,16 +89,30 @@ export default function Footer() {
               Popular Courses
             </h3>
             <ul className="space-y-2">
-              {footerLinks.courses.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-gray-400 transition-colors hover:text-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {popularCourses && popularCourses.length > 0 ? (
+                popularCourses.map((course) => (
+                  <li key={course._id}>
+                    <Link
+                      to={course.slug ? `/bootcamps/${course.slug}` : `/bootcamps/${course._id}`}
+                      className="text-sm text-gray-400 transition-colors hover:text-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded block truncate"
+                      aria-label={`View ${course.title}`}
+                    >
+                      {course.title}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                footerLinks.courses.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="text-sm text-gray-400 transition-colors hover:text-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </nav>
 
