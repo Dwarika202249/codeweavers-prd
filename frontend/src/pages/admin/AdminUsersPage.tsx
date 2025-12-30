@@ -170,23 +170,23 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <SEO title={pageTitle} description={`Manage platform users (${users.length})`} />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-xl font-bold text-white">Manage Users</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
           <input
             placeholder="Search users by name or email"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search users by name or email"
             disabled={initialLoading}
-            className={`px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`w-full sm:w-auto px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
           />
-          <select aria-label="Role filter" title="Role filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} disabled={initialLoading} className={`px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
+          <select aria-label="Role filter" title="Role filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} disabled={initialLoading} className={`w-full sm:w-auto px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
             <option value="">All roles</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
-          <select aria-label="Status filter" title="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} disabled={initialLoading} className={`px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
+          <select aria-label="Status filter" title="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} disabled={initialLoading} className={`w-full sm:w-auto px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
             <option value="">Any status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -199,7 +199,7 @@ export default function AdminUsersPage() {
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
             disabled={initialLoading}
-            className={`px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`w-full sm:w-auto px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
           />
           <input
             type="date"
@@ -209,24 +209,26 @@ export default function AdminUsersPage() {
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
             disabled={initialLoading}
-            className={`px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`w-full sm:w-auto px-3 py-2 rounded bg-gray-900 text-white ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
           />
-          <button
-            type="button"
-            aria-label="Clear all filters and search"
-            onClick={() => { setQuery(''); setRoleFilter(''); setStatusFilter(''); setFromDate(''); setToDate(''); fetchUsers(1, ''); }}
-            disabled={initialLoading}
-            className={`px-3 py-2 bg-gray-800 text-gray-300 rounded ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
-          >
-            Clear
-          </button>
-          <button
-            onClick={exportCSVServer}
-            disabled={initialLoading || exporting}
-            className={`px-3 py-2 rounded ${initialLoading || exporting ? 'bg-gray-700 text-gray-300 opacity-60 cursor-not-allowed' : 'bg-gray-700 text-white'}`}
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Export CSV'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              aria-label="Clear all filters and search"
+              onClick={() => { setQuery(''); setRoleFilter(''); setStatusFilter(''); setFromDate(''); setToDate(''); fetchUsers(1, ''); }}
+              disabled={initialLoading}
+              className={`px-3 py-2 bg-gray-800 text-gray-300 rounded ${initialLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              Clear
+            </button>
+            <button
+              onClick={exportCSVServer}
+              disabled={initialLoading || exporting}
+              className={`px-3 py-2 rounded ${initialLoading || exporting ? 'bg-gray-700 text-gray-300 opacity-60 cursor-not-allowed' : 'bg-gray-700 text-white'}`}
+            >
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Export CSV'}
+            </button>
+          </div>
         </div>
       </div>
 

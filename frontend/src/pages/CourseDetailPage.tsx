@@ -1,4 +1,5 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { ArrowLeft, Clock, Users, CheckCircle, BookOpen, Calendar, Monitor, FolderCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
@@ -6,7 +7,6 @@ import SEO from '../components/SEO';
 import { CoursePageSchema } from '../components/JsonLd';
 import PaymentPanel from '../components/PaymentPanel';
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { courseAPI, type Course } from '../lib/api';
 import { showSuccess } from '../lib/toastUtils';
 
@@ -17,10 +17,14 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useAuth();
+  const params = new URLSearchParams(location.search);
+  const adminView = params.get('adminView') === 'true' || user?.role === 'admin';
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const status = params.get('status');
-    const sessionId = params.get('session_id');
+    const p = new URLSearchParams(location.search);
+    const status = p.get('status');
+    const sessionId = p.get('session_id');
 
     if (status === 'success' && sessionId) {
       // Confirm session server-side and attempt to ensure enrollment exists
@@ -173,6 +177,43 @@ export default function CourseDetailPage() {
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             <div className="md:col-span-2">
               {/* Curriculum Section */}
+
+              {/* Topics */}
+              {course.topics && course.topics.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="mt-8"
+                >
+                  <h2 className="text-2xl font-bold text-white">Technologies & Tools</h2>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {course.topics.map((topic) => (
+                      <span key={topic} className="rounded-lg bg-gray-800 px-4 py-2 text-gray-200">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Learning Outcomes */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-12"
+              >
+                <h2 className="text-2xl font-bold text-white">Learning Outcomes</h2>
+                <ul className="mt-6 space-y-4">
+                  {course.learningOutcomes?.map((outcome, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-400" />
+                      <span className="text-gray-300">{outcome}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
               {course.curriculum && course.curriculum.length > 0 && (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -180,7 +221,7 @@ export default function CourseDetailPage() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className=""
                 >
-                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-2 mt-8">
                     <BookOpen className="h-6 w-6 text-indigo-400" />
                     Curriculum Breakdown
                   </h2>
@@ -307,7 +348,14 @@ export default function CourseDetailPage() {
             </div>
 
             <aside className="md:col-span-1 self-start mt-6 md:mt-14">
-              <PaymentPanel courseSlug={course.slug} price={course.price || 0} coverImage={course.coverImage} shortDescription={course.shortDescription} />
+              {adminView ? (
+                <div className="rounded-lg border border-gray-700 bg-gray-900 p-4 text-sm text-gray-300">
+                  <div className="font-medium text-white mb-2">Admin view</div>
+                  <div>Enrollment and payment actions are hidden for admin users. Use the admin dashboard to manage enrollments.</div>
+                </div>
+              ) : (
+                <PaymentPanel courseSlug={course.slug} price={course.price || 0} coverImage={course.coverImage} shortDescription={course.shortDescription} />
+              )}
             </aside>
           </div>
 

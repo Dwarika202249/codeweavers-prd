@@ -89,12 +89,12 @@ export default function AdminEnrollmentsPage() {
 
       <div className="mt-4 space-y-3">
         {enrollments.filter(e => !statusFilter || e.status === statusFilter).map((e) => (
-          <div key={e._id} className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div key={e._id} className="bg-linear-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center gap-4">
               {e.user?.avatar ? (
-                <img src={e.user.avatar} alt={e.user?.name || 'User avatar'} className="w-12 h-12 rounded-full object-cover" />
+                <img src={e.user.avatar} alt={e.user?.name || 'User avatar'} className="w-12 h-12 rounded-full object-cover shrink-0" />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">{(e.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
+                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold shrink-0">{(e.user?.name || 'U').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
               )}
 
               <div>
@@ -105,14 +105,14 @@ export default function AdminEnrollmentsPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-end gap-2 mr-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2">
                 <span className={`${statusClass(e.status)} px-3 py-1 rounded-full text-xs font-medium`}>{e.status}</span>
                 <span className={`${paymentClass(e.paymentStatus)} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2`}><CreditCard className="w-3 h-3" /> {e.paymentStatus || 'N/A'}</span>
               </div>
 
-              <div className="flex gap-2">
-                <select aria-label={`Change status for ${e.user?.name}`} id={`status-${e._id}`} value={e.status} onChange={(ev) => changeStatus(e._id, ev.target.value)} className="rounded bg-gray-900 border border-gray-800 px-2 py-1 text-white text-sm">
+              <div className="flex gap-2 flex-wrap">
+                <select aria-label={`Change status for ${e.user?.name}`} id={`status-${e._id}`} value={e.status} onChange={(ev) => changeStatus(e._id, ev.target.value)} className="rounded bg-gray-900 border border-gray-800 px-2 py-1 text-white text-sm w-full sm:w-auto">
                   <option value="enrolled">enrolled</option>
                   <option value="pending">pending</option>
                   <option value="completed">completed</option>

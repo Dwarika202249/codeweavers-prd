@@ -73,7 +73,7 @@ export default function AdminEnrollmentDetailPage() {
       </div>
 
       <div className="bg-linear-to-r from-gray-900 via-gray-800 to-gray-900 rounded-lg p-5 border border-gray-700">
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex items-center gap-4">
             {enrollment.user?.avatar ? (
               <img src={enrollment.user.avatar} alt={enrollment.user?.name || 'Student avatar'} className="w-14 h-14 rounded-full object-cover shadow" />
@@ -87,20 +87,20 @@ export default function AdminEnrollmentDetailPage() {
               <div className="font-semibold text-white">{enrollment.user?.name}</div>
               <div className="text-xs text-gray-400">{enrollment.user?.email}</div>
               <div className="mt-2">
-                <Link to={`/bootcamps/${enrollment.course?.slug}`} className="inline-flex items-center gap-2 px-2 py-1 rounded bg-indigo-700 text-xs text-white">
+                <Link to={`/bootcamps/${enrollment.course?.slug}?adminView=true`} className="inline-flex items-center gap-2 px-2 py-1 rounded bg-indigo-700 text-xs text-white">
                   <BookOpen className="w-3 h-3" /> {enrollment.course?.title}
                 </Link>
               </div>
             </div>
           </div>
 
-          <div className="ml-auto flex flex-col items-end gap-2">
+          <div className="md:ml-auto ml-0 flex items-start md:items-end gap-2 mt-3 md:mt-0">
             <div className="flex items-center gap-2">
               <span className={`${statusClass(enrollment.status)} px-3 py-1 rounded-full text-xs font-medium capitalize`}>{enrollment.status}</span>
               <span className={`${paymentClass(enrollment.paymentStatus)} px-3 py-1 rounded-full text-xs font-medium`}>{enrollment.paymentStatus || 'N/A'}</span>
             </div>
 
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 flex-wrap mt-2">
               <Link to={`/bootcamps/${enrollment.course?.slug}`} className="px-3 py-1 rounded bg-yellow-500 text-black text-sm">View Course</Link>
               <button className="px-3 py-1 rounded bg-gray-700 text-white text-sm" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>Jump to Notes</button>
             </div>

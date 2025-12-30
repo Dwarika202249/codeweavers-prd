@@ -115,15 +115,15 @@ export default function StudentDashboard() {
           ) : (
             <div className="space-y-3">
               {enrollments.slice(0, 4).map((e: any) => (
-                <div key={e._id} className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
-                  <div className="w-16 h-16 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <div key={e._id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
+                  <div className="w-16 h-16 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
                     <BookOpen className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <h3 className="font-medium text-white truncate">{e.course?.title || 'Course'}</h3>
                     <div className="text-xs text-gray-400 truncate">{e.course?.shortDescription}</div>
                   </div>
-                  <div className="w-48">
+                  <div className="w-full sm:w-40 md:w-48 mt-3 sm:mt-0 flex-none">
                     <progress value={Math.min(100, Math.max(0, Number(e.progress) || 0))} max={100} className="w-full h-2 rounded appearance-none" />
                     <div className="text-xs text-gray-400 mt-2 flex items-center justify-between">
                       <span>{e.status?.charAt(0)?.toUpperCase() + (e.status?.slice(1) || '')}</span>

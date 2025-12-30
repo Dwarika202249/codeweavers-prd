@@ -44,15 +44,15 @@ export default function ProfilePage() {
             <div className="text-gray-400 text-3xl font-semibold">{user?.name?.charAt(0) ?? 'U'}</div>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-center md:text-left">
           <h1 className="text-2xl font-semibold text-white">{user?.name}</h1>
           <div className="text-sm text-gray-400 mt-1">{user?.email}</div>
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <div className="mt-3 flex items-center gap-2 flex-wrap justify-center md:justify-start">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-300 text-sm">Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-300 text-sm">{user?.role === 'admin' ? 'Admin' : 'Student'}</span>
           </div>
         </div>
-        <div className="w-full md:w-auto flex gap-3 justify-end items-center md:flex-nowrap flex-wrap">
+        <div className="w-full md:w-auto flex gap-3 justify-center md:justify-end items-center md:flex-nowrap flex-wrap">
           <div className="bg-gray-900 p-3 rounded-lg text-center min-w-24 flex-1 md:flex-none">
             <div className="text-sm text-gray-400">Enrolled</div>
             <div className="text-lg font-semibold text-white">{enrolledCount}</div>

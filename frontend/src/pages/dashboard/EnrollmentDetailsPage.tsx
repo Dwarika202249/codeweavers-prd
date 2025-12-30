@@ -156,17 +156,17 @@ export default function EnrollmentDetailsPage() {
     return (
         <div className="space-y-6">
             <SEO title={`${course.title || 'Course'} | Enrollment Details`} description={`Enrollment details for ${course.title || ''}`} />
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-start gap-4">
                 {course.coverImage ? <img src={course.coverImage} alt={course.title} className="w-28 h-20 rounded object-cover" /> : <div className="w-28 h-20 rounded bg-gray-800" />}
-                <div>
+                <div className="flex-1 min-w-0">
                     <h1 className="text-xl font-bold text-white">{course.title}</h1>
                     <div className="mt-1 text-sm text-gray-300">Instructor: {course.instructor || '—'}</div>
-                    <div className="mt-2 flex items-center gap-3">
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
                         <div className="px-2 py-1 rounded bg-indigo-700 text-sm text-white">{enrollment.status}</div>
                         <div className="text-sm text-gray-400">Enrolled: {new Date(enrollment.createdAt).toLocaleDateString()}</div>
                         <div className="text-sm text-gray-400">Payment: {enrollment.paymentStatus || 'N/A'}</div>
 
-                        <div className="ml-4">
+                        <div className="ml-0 sm:ml-4 mt-3 sm:mt-0">
                             {certLoading ? (
                                 <div className="text-xs text-gray-400">Checking certificate…</div>
                             ) : !certificate ? (
@@ -225,7 +225,7 @@ export default function EnrollmentDetailsPage() {
                     <div>
                         <div className="text-sm text-gray-400">Progress</div>
                         <div className="mt-2 flex items-center gap-3">
-                            <progress className="w-56 h-3 progress-bar" value={Math.max(0, Math.min(100, enrollment.progress || 0))} max={100} />
+                            <progress className="w-full sm:w-56 h-3 progress-bar" value={Math.max(0, Math.min(100, enrollment.progress || 0))} max={100} />
                             <div className="text-sm text-gray-300">{enrollment.progress || 0}%</div>
                         </div>
                     </div>
