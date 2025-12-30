@@ -39,8 +39,7 @@ const AdminCertificatesPage = lazy(() => import('../pages/admin/AdminCertificate
 const AdminCertificateDetailPage = lazy(() => import('../pages/admin/AdminCertificateDetailPage'));
 const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
 const AdminAssignmentsPage = lazy(() => import('../pages/admin/AdminAssignmentsPage'));
-const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignmentDetailPage'));
-export const router = createBrowserRouter([
+const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignmentDetailPage'));const AdminSettingsPage = lazy(() => import('../pages/admin/AdminSettingsPage'));export const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
@@ -193,7 +192,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'settings',
-        element: <LazyPage><ComingSoonPage title="Admin Settings" /></LazyPage>,
+        element: <LazyPage><AdminSettingsPage /></LazyPage>,
       },
     ],
   },

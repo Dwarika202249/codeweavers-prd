@@ -240,6 +240,12 @@ export const paymentsAPI = {
   revenueTrend: (params?: { days?: number }) => api.get<{ success: boolean; data: { days: { date: string; revenue: number; count: number }[] } }>(`/payments/stats/revenue`, { params }),
 };
 
+// Admin settings API
+export const adminSettingsAPI = {
+  get: () => api.get<{ success: boolean; data: { settings: any } }>(`/admin/settings`),
+  update: (data: any) => api.put<{ success: boolean; data: { settings: any } }>(`/admin/settings`, data),
+};
+
 export const enrollmentAPI = {
   enroll: (data: { courseId?: string; courseSlug?: string }) =>
     api.post<{ success: boolean; data: { enrollment: any } }>('/enrollments', data),

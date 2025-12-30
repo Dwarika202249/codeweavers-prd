@@ -64,6 +64,9 @@ import paymentRoutes from './routes/payment.routes.js';
 app.use('/api/payments', paymentRoutes);
 import uploadRoutes from './routes/upload.routes.js';
 app.use('/api/uploads', uploadRoutes);
+// Admin settings
+import settingsRoutes from './routes/settings.routes.js';
+app.use('/api/admin/settings', settingsRoutes);
 
 // Error handling
 app.use(notFound);
