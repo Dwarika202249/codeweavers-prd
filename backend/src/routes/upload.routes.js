@@ -30,7 +30,8 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilt
 router.post('/courses', protect, adminOnly, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'File is required' });
 
-  const url = `${req.protocol}://${req.get('host')}/uploads/courses/${req.file.filename}`;
+  const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+  const url = `${proto}://${req.get('host')}/uploads/courses/${req.file.filename}`;
   let thumbnailUrl = null;
 
   // Attempt to generate a thumbnail (requires sharp)
@@ -57,7 +58,8 @@ router.post('/courses', protect, adminOnly, upload.single('file'), async (req, r
         .jpeg({ quality: 80 })
         .toFile(thumbPath);
 
-      thumbnailUrl = `${req.protocol}://${req.get('host')}/uploads/courses/thumbs/${thumbName}`;
+      const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+      thumbnailUrl = `${proto}://${req.get('host')}/uploads/courses/thumbs/${thumbName}`;
     }
   } catch (err) {
     console.error('Error generating thumbnail:', err);

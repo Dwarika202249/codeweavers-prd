@@ -16,6 +16,8 @@ import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 // Initialize express app
 const app = express();
+// If running behind a proxy (e.g., Render/Vercel), trust proxy headers so req.protocol reflects X-Forwarded-Proto
+app.set('trust proxy', true);
 
 // Connect to database
 connectDB();

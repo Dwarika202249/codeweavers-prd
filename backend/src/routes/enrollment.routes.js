@@ -694,7 +694,8 @@ router.post(
       const enrollment = await Enrollment.findById(certificate.enrollment).populate('course');
       const student = await User.findById(certificate.student);
       const serial = `CW-${Date.now()}`;
-      const verificationUrl = `${req.protocol}://${req.get('host')}/api/certificates/${certificate._id}/download`;
+      const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+    const verificationUrl = `${proto}://${req.get('host')}/api/certificates/${certificate._id}/download`;
       // Prefer course instructor name for signature if available
       const instructorName = enrollment?.course?.instructor || 'Course Instructor';
       const signaturePath = config.certificateSignaturePath || '';
@@ -705,11 +706,13 @@ router.post(
         try {
           const parsed = new URL(result.fileUrl);
           // use backend host + the same pathname to avoid mixing hosts
-          fileUrl = `${req.protocol}://${req.get('host')}${parsed.pathname}`;
+          const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+          fileUrl = `${proto}://${req.get('host')}${parsed.pathname}`;
         } catch (e) {
           // result.fileUrl might be a relative path like /uploads/..., or just 'uploads/..'
           const rel = result.fileUrl.startsWith('/') ? result.fileUrl : `/${result.fileUrl}`;
-          fileUrl = `${req.protocol}://${req.get('host')}${rel}`;
+          const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+          fileUrl = `${proto}://${req.get('host')}${rel}`;
         }
       } else {
         res.status(500);
@@ -725,7 +728,8 @@ router.post(
       }
 
       const file = req.file;
-      fileUrl = `${req.protocol}://${req.get('host')}/uploads/certificates/${file.filename}`;
+      const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+      fileUrl = `${proto}://${req.get('host')}/uploads/certificates/${file.filename}`;
 
       // mark issued and attach file
       await certificate.markIssued({ issuedBy: req.user._id, fileUrl, notes: req.body.notes || certificate.notes, meta: req.body.meta ? JSON.parse(req.body.meta) : undefined });
@@ -742,7 +746,8 @@ router.post(
     try {
       const student = await User.findById(certificate.student);
       const courseTitle = certificate.enrollment?.course?.title || 'your course';
-      const downloadLink = `${req.protocol}://${req.get('host')}/api/certificates/${certificate._id}/download`;
+      const proto = (req.headers['x-forwarded-proto'] && String(req.headers['x-forwarded-proto']).split(',')[0]) || req.protocol;
+      const downloadLink = `${proto}://${req.get('host')}/api/certificates/${certificate._id}/download`;
       await sendEmail({
         to: student.email,
         subject: `Your certificate for ${courseTitle} is ready`,
