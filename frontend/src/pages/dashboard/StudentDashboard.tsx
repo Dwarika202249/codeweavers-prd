@@ -6,14 +6,6 @@ import { useEffect, useState } from 'react';
 import SEO from '../../components/SEO';
 import { enrollmentAPI } from '../../lib/api';
 
-// Helper: parse hours from a course.duration string like "24" "24h" "24 hrs" => number
-const parseHours = (raw?: string | number) => {
-  if (!raw) return 0;
-  if (typeof raw === 'number') return raw;
-  const match = String(raw).match(/(\d+(?:\.\d+)?)/);
-  if (!match) return 0;
-  return Number(match[1]);
-};
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -47,17 +39,15 @@ export default function StudentDashboard() {
   const enrolledCount = enrollments.length;
   const completedCount = enrollments.filter((e) => e.status === 'completed' || (typeof e.progress !== 'undefined' && e.progress >= 100)).length;
   const avgProgress = enrollments.length === 0 ? 0 : Math.round(enrollments.reduce((s, e) => s + (Number(e.progress) || 0), 0) / enrollments.length);
-  // Estimate hours learned: sum of (course.duration * progress%) if parsable
-  const hoursLearned = Math.round(enrollments.reduce((sum, e) => {
-    const hrs = parseHours(e.course?.duration);
-    return sum + (hrs * ((Number(e.progress) || 0) / 100));
-  }, 0));
+
+
+  const longestStreakValue = user ? (user.longestLoginStreak ?? 0) : (loadingEnrollments ? <Loader2 className="w-5 h-5 text-indigo-300 animate-spin" /> : '0');
 
   const stats = [
     { label: 'Enrolled Courses', value: String(enrolledCount), icon: BookOpen, color: 'text-indigo-400' },
-    { label: 'Hours Learned', value: loadingEnrollments ? <Loader2 className="w-5 h-5 text-indigo-300 animate-spin" /> : String(hoursLearned), icon: Clock, color: 'text-green-400' },
+    { label: 'Longest days streak', value: longestStreakValue, icon: TrendingUp, color: 'text-red-400' },
     { label: 'Certificates', value: String(completedCount), icon: Award, color: 'text-yellow-400' },
-    { label: 'Progress', value: `${avgProgress}%`, icon: TrendingUp, color: 'text-pink-400' },
+    { label: 'Progress', value: `${avgProgress}%`, icon: Clock, color: 'text-pink-400' },
   ];
 
   return (
@@ -95,6 +85,43 @@ export default function StudentDashboard() {
           </motion.div>
         ))}
       </div>
+
+      {/* Login Streak Calendar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-white">Daily login streak (last 30 days)</h3>
+          <div className="text-xs text-gray-400">Longest: <span className="font-semibold text-white ml-1">{user?.longestLoginStreak ?? 0}</span></div>
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {(() => {
+            const days: string[] = [];
+            const today = new Date();
+            for (let i = 29; i >= 0; i--) {
+              const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+              d.setUTCDate(d.getUTCDate() - i);
+              days.push(d.toISOString().slice(0,10));
+            }
+            const loginSet = new Set(user?.loginDays || []);
+            return days.map((d) => {
+              const logged = loginSet.has(d);
+              return (
+                <div key={d} title={`${d} - ${logged ? 'Logged in' : 'Missed'}`} className={`w-6 h-6 rounded-sm ${logged ? 'bg-green-400' : 'bg-gray-700/30'} flex items-center justify-center`}></div>
+              );
+            });
+          })()}
+        </div>
+        <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
+          <div className="w-4 h-4 bg-green-400 rounded-sm" />
+          <span>Logged in</span>
+          <div className="w-4 h-4 bg-gray-700/30 rounded-sm ml-4" />
+          <span>Missed</span>
+        </div>
+      </motion.div>
 
       {/* Recent Activity */}
       <motion.div

@@ -226,20 +226,51 @@ router.get(
   '/me',
   protect,
   asyncHandler(async (req, res) => {
-    res.json({
-      success: true,
-      data: {
-        user: {
-          id: req.user._id,
-          name: req.user.name,
-          email: req.user.email,
-          role: req.user.role,
-          avatar: req.user.avatar,
-          isEmailVerified: req.user.isEmailVerified,
-          createdAt: req.user.createdAt,
+    // Also return login streak info and recent login days (last 30)
+    try {
+      const LoginEvent = (await import('../models/LoginEvent.model.js')).default;
+      const since = new Date();
+      since.setUTCDate(since.getUTCDate() - 29); // last 30 days
+      const events = await LoginEvent.find({ user: req.user._id, date: { $gte: since } }).select('date -_id').lean();
+      const loginDays = events.map((e) => (e.date ? e.date.toISOString().slice(0,10) : null)).filter(Boolean);
+
+      res.json({
+        success: true,
+        data: {
+          user: {
+            id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            role: req.user.role,
+            avatar: req.user.avatar,
+            isEmailVerified: req.user.isEmailVerified,
+            createdAt: req.user.createdAt,
+            currentLoginStreak: req.user.currentLoginStreak || 0,
+            longestLoginStreak: req.user.longestLoginStreak || 0,
+            loginDays,
+          },
         },
-      },
-    });
+      });
+    } catch (err) {
+      // fallback: return basic profile if events fail
+      res.json({
+        success: true,
+        data: {
+          user: {
+            id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            role: req.user.role,
+            avatar: req.user.avatar,
+            isEmailVerified: req.user.isEmailVerified,
+            createdAt: req.user.createdAt,
+            currentLoginStreak: req.user.currentLoginStreak || 0,
+            longestLoginStreak: req.user.longestLoginStreak || 0,
+            loginDays: [],
+          },
+        },
+      });
+    }
   })
 );
 

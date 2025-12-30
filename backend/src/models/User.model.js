@@ -49,6 +49,16 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // consecutive current login streak in days
+    currentLoginStreak: {
+      type: Number,
+      default: 0,
+    },
+    // longest recorded login streak
+    longestLoginStreak: {
+      type: Number,
+      default: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -83,10 +93,60 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Update last login
+// Helper: normalize a Date to UTC midnight (date-only)
+function toUtcDateOnly(d) {
+  const date = new Date(d);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+// Update last login and maintain streaks and a daily login event
 userSchema.methods.updateLastLogin = async function () {
-  this.lastLoginAt = new Date();
-  return this.save();
+  try {
+    const now = new Date();
+    const today = toUtcDateOnly(now);
+
+    // dynamic import to avoid circular deps
+    const LoginEvent = (await import('./LoginEvent.model.js')).default;
+
+    // upsert today's login event (create only once)
+    await LoginEvent.findOneAndUpdate(
+      { user: this._id, date: today },
+      { $setOnInsert: { user: this._id, date: today } },
+      { upsert: true }
+    );
+
+    // previous login date normalized
+    const prev = this.lastLoginAt ? toUtcDateOnly(this.lastLoginAt) : null;
+
+    if (prev && prev.getTime() === today.getTime()) {
+      // already logged in today — no change
+    } else if (prev) {
+      // check if previous login was yesterday (UTC)
+      const yesterday = new Date(today);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+      if (prev.getTime() === yesterday.getTime()) {
+        this.currentLoginStreak = (this.currentLoginStreak || 0) + 1;
+      } else {
+        this.currentLoginStreak = 1;
+      }
+    } else {
+      // first login
+      this.currentLoginStreak = 1;
+    }
+
+    // update longest streak
+    if (!this.longestLoginStreak || this.currentLoginStreak > this.longestLoginStreak) {
+      this.longestLoginStreak = this.currentLoginStreak;
+    }
+
+    this.lastLoginAt = now;
+    return this.save();
+  } catch (err) {
+    // don't throw — preserve login even if streak tracking fails
+    console.warn('Failed to update login streak', err);
+    this.lastLoginAt = new Date();
+    return this.save();
+  }
 };
 
 const User = mongoose.model('User', userSchema);

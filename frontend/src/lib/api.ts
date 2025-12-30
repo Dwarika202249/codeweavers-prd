@@ -75,6 +75,10 @@ export interface User {
   avatar?: string;
   isEmailVerified?: boolean;
   createdAt?: string;
+  // Login streaks (optional, provided by /auth/me)
+  currentLoginStreak?: number;
+  longestLoginStreak?: number;
+  loginDays?: string[]; // ISO dates YYYY-MM-DD of recent login days
 }
 
 export interface AuthResponse {
