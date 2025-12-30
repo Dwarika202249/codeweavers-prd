@@ -22,7 +22,7 @@ export interface Course {
   curriculum?: CurriculumModule[];
   schedule?: string;
   batchSize?: string;
-  mode?: 'Online' | 'Offline' | 'Hybrid';
+  mode?: 'Online' | 'In-Person' | 'Hybrid';
 }
 
 // Testimonial types

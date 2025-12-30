@@ -11,7 +11,12 @@ const CourseSchema = new mongoose.Schema({
   price: { type: Number, default: 0 },
   prerequisites: [{ type: String }],
   learningOutcomes: [{ type: String }],
+  // e.g. 'Mon-Wed-Fri 6-8pm' or 'Weekends'
   schedule: { type: String },
+  // batchSize can be a string like '10-15' or number (keeps flexibility)
+  batchSize: { type: String },
+  // mode of delivery
+  mode: { type: String, enum: ['Online', 'In-Person', 'Hybrid'], default: 'Online' },
   coverImage: { type: String },
   coverImageThumb: { type: String },
   instructor: { type: String },

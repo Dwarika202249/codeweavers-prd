@@ -20,6 +20,8 @@ export default function AdminCourseForm() {
     duration: '',
     level: 'Beginner',
     price: 0,
+    batchSize: '',
+    mode: 'Online',
     prerequisites: '',
     learningOutcomes: '',
     schedule: '',
@@ -46,6 +48,8 @@ export default function AdminCourseForm() {
           duration: c.duration || '',
           level: c.level || 'Beginner',
           price: c.price ?? 0,
+          batchSize: c.batchSize || '',
+          mode: c.mode || 'Online',
           prerequisites: (c.prerequisites || []).join('\n'),
           learningOutcomes: (c.learningOutcomes || []).join('\n'),
           schedule: c.schedule || '',
@@ -175,6 +179,8 @@ export default function AdminCourseForm() {
               : (typeof m.topics === 'string' ? m.topics.split(/\s*(?:,|\n)\s*/).map((s: string) => s.trim()).filter(Boolean) : []);
           return { week: m.week || '', title: m.title || '', topics, project: m.project || '' };
         }),
+        batchSize: form.batchSize || '',
+        mode: form.mode || 'Online',
       };
 
       if (id) {
@@ -259,7 +265,7 @@ export default function AdminCourseForm() {
             {savingInstructor ? <div className="text-xs text-gray-400">Saving…</div> : null}
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div>
             <label htmlFor="duration" className="block text-sm font-medium text-gray-200 mb-1">Duration</label>
             <input id="duration" name="duration" value={form.duration} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
@@ -275,6 +281,25 @@ export default function AdminCourseForm() {
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-200 mb-1">Price</label>
             <input id="price" name="price" type="number" value={form.price} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label htmlFor="batchSize" className="block text-sm font-medium text-gray-200 mb-1">Batch Size</label>
+            <input id="batchSize" name="batchSize" value={form.batchSize} onChange={handleChange} placeholder="e.g. 10-15" className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+          <div>
+            <label htmlFor="mode" className="block text-sm font-medium text-gray-200 mb-1">Mode</label>
+            <select id="mode" name="mode" value={form.mode} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white">
+              <option>Online</option>
+              <option>In-Person</option>
+              <option>Hybrid</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="schedule" className="block text-sm font-medium text-gray-200 mb-1">Schedule</label>
+            <input id="schedule" name="schedule" value={form.schedule} onChange={handleChange} className="w-full rounded bg-gray-800 px-3 py-2 text-white" />
           </div>
         </div>
         <div>
