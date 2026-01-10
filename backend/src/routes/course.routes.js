@@ -37,7 +37,7 @@ router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
 
   const tagsClean = Array.isArray(req.body.tags) ? req.body.tags.map(s => String(s).trim()).filter(Boolean) : (typeof req.body.tags === 'string' ? req.body.tags.split(',').map(s => s.trim()).filter(Boolean) : []);
 
-  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, instructor: instructor || '', coverImage: coverImage || '', coverImageThumb: req.body.coverImageThumb || '', prerequisites, learningOutcomes, schedule, batchSize: batchSize || '', mode: mode || 'Online', curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
+  const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, instructor: instructor || '', coverImage: coverImage || '', coverImageThumb: req.body.coverImageThumb || '', coverImagePublicId: req.body.coverImagePublicId || '', coverImageResourceType: req.body.coverImageResourceType || '', prerequisites, learningOutcomes, schedule, batchSize: batchSize || '', mode: mode || 'Online', curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
 
   res.status(201).json({ success: true, data: { course } });
 }));
@@ -134,7 +134,7 @@ router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   }
 
   // apply other fields
-  const updatable = ['title','slug','shortDescription','description','duration','level','price','prerequisites','learningOutcomes','schedule','batchSize','mode','published','coverImage','instructor','tags','capacity'];
+  const updatable = ['title','slug','shortDescription','description','duration','level','price','prerequisites','learningOutcomes','schedule','batchSize','mode','published','coverImage','coverImagePublicId','coverImageResourceType','instructor','tags','capacity'];
   updatable.forEach((k) => {
     if (typeof req.body[k] !== 'undefined') course[k] = req.body[k];
   });

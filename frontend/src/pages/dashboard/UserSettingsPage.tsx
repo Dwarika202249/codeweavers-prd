@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../hooks/useAuth';
-import { authAPI } from '../../lib/api';
+import { authAPI, uploadsAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import { Mail, Bell, Trash, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -70,12 +70,29 @@ export default function UserSettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { showError('Image is too large. Please use an image under 2MB.'); return; }
+
+    // Try to upload the avatar to server/Cloudinary
     try {
-      const dataUrl = await fileToDataUrl(file);
-      setAvatarPreview(dataUrl);
-      setValue('avatar', dataUrl);
-    } catch (err) {
-      showError('Failed to read image file');
+      const form = new FormData();
+      form.append('file', file);
+      const res = await uploadsAPI.uploadAvatar(form);
+      const url = res.data.data.url || null;
+      const updatedUser = res.data.data.user || null;
+      if (url) setAvatarPreview(url);
+      if (updatedUser) updateUser(updatedUser);
+      setValue('avatar', '');
+      showSuccess('Avatar uploaded');
+      return;
+    } catch (err: any) {
+      // fallback to client-side data URL preview if upload fails
+      try {
+        const dataUrl = await fileToDataUrl(file);
+        setAvatarPreview(dataUrl);
+        setValue('avatar', dataUrl);
+        showError('Upload failed, using local preview. Save profile to persist.');
+      } catch (readErr) {
+        showError('Failed to read image file');
+      }
     }
   };
 
@@ -117,6 +134,9 @@ export default function UserSettingsPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [showRemoveAvatarDialog, setShowRemoveAvatarDialog] = useState(false);
+  const [isRemovingAvatar, setIsRemovingAvatar] = useState(false);
+
   const requestAccountDeletion = () => {
     if (!user) return;
     setDeletePassword('');
@@ -143,6 +163,23 @@ export default function UserSettingsPage() {
     } finally { setIsDeleting(false); }
   };
 
+  const performRemoveAvatar = async () => {
+    if (!user) return;
+    setIsRemovingAvatar(true);
+    try {
+      const res = await uploadsAPI.deleteAvatar();
+      const updatedUser = res.data.data.user || null;
+      if (updatedUser) updateUser(updatedUser);
+      setAvatarPreview(updatedUser?.avatar || null);
+      setShowRemoveAvatarDialog(false);
+      showSuccess('Avatar removed');
+    } catch (err: any) {
+      showError(err?.message || 'Failed to remove avatar');
+    } finally {
+      setIsRemovingAvatar(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-3xl">
       <SEO title="Settings" description="Configure your account preferences and notification settings." />
@@ -167,6 +204,21 @@ export default function UserSettingsPage() {
                 <label htmlFor="avatar-input" className="block text-sm text-gray-300">Change avatar</label>
                 <input id="avatar-input" aria-label="Upload avatar" type="file" accept="image/*" onChange={onAvatarChange} className="mt-2 text-sm text-gray-200" />
                 <p className="text-xs text-gray-400 mt-1">Max 2MB. Images will be stored as your avatar.</p>
+                <div className="mt-2 flex gap-2">
+                  <button type="button" onClick={() => setShowRemoveAvatarDialog(true)} className="px-3 py-1 rounded bg-red-600 text-white text-sm">Remove avatar</button>
+                </div>
+
+              {/* Confirm remove avatar modal */}
+              <ConfirmDialog
+                open={showRemoveAvatarDialog}
+                title="Remove avatar"
+                message="This will remove your avatar image from Cloudinary and clear it from your profile. This action is reversible by uploading a new avatar."
+                confirmText="Remove"
+                cancelText="Cancel"
+                loading={isRemovingAvatar}
+                onConfirm={performRemoveAvatar}
+                onCancel={() => setShowRemoveAvatarDialog(false)}
+              />
               </div>
             </div>
           </div>
@@ -179,7 +231,6 @@ export default function UserSettingsPage() {
 
           <div className="flex gap-2">
             <button type="submit" disabled={isSavingProfile} className="px-4 py-2 bg-indigo-600 text-white rounded">{isSavingProfile ? <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Saving...</span> : 'Save Profile'}</button>
-            <button type="button" onClick={() => { setAvatarPreview(user?.avatar || null); setValue('avatar', ''); }} className="px-4 py-2 bg-gray-700 text-white rounded">Reset Avatar</button>
           </div>
         </form>
       </section>

@@ -19,6 +19,9 @@ const CourseSchema = new mongoose.Schema({
   mode: { type: String, enum: ['Online', 'In-Person', 'Hybrid'], default: 'Online' },
   coverImage: { type: String },
   coverImageThumb: { type: String },
+  // Cloudinary metadata
+  coverImagePublicId: { type: String },
+  coverImageResourceType: { type: String },
   instructor: { type: String },
   tags: [{ type: String }],
   targetAudience: [{ type: String }],

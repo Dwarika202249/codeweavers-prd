@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { courseAPI, uploadsAPI } from '../../lib/api';
 import { showSuccess, showError } from '../../lib/toastUtils';
 import SEO from '../../components/SEO';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 export default function AdminCourseForm() {
   const { id } = useParams<{ id?: string }>();
@@ -12,6 +13,8 @@ export default function AdminCourseForm() {
   const [uploadingCover, setUploadingCover] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [savingInstructor, setSavingInstructor] = useState(false);
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [removingCover, setRemovingCover] = useState(false);
   const [form, setForm] = useState<any>({
     title: '',
     slug: '',
@@ -27,6 +30,8 @@ export default function AdminCourseForm() {
     schedule: '',
     published: false,
     coverImage: '',
+    coverImagePublicId: '',
+    coverImageResourceType: '',
     instructor: '',
     tags: '',
     targetAudience: '',
@@ -55,6 +60,8 @@ export default function AdminCourseForm() {
           schedule: c.schedule || '',
           published: !!c.published,
           coverImage: c.coverImage || '',
+          coverImagePublicId: c.coverImagePublicId || '',
+          coverImageResourceType: c.coverImageResourceType || '',
           instructor: c.instructor || '',
           tags: (c.tags || []).join(', '),
           targetAudience: (c.targetAudience || []).join(', '),
@@ -88,11 +95,13 @@ export default function AdminCourseForm() {
       const res = await uploadsAPI.uploadCourseImage(formData);
       const url = res.data.data.url;
       const thumbnailUrl = res.data.data.thumbnailUrl ?? null;
-      setForm((prev: any) => ({ ...prev, coverImage: url, coverImageThumb: thumbnailUrl }));
-      // If we're editing an existing course, persist coverImage and thumb immediately to DB to avoid losing it
+      const publicId = res.data.data.public_id ?? null;
+      const resourceType = res.data.data.resource_type ?? null;
+      setForm((prev: any) => ({ ...prev, coverImage: url, coverImageThumb: thumbnailUrl, coverImagePublicId: publicId, coverImageResourceType: resourceType }));
+      // If we're editing an existing course, persist coverImage and metadata immediately to DB to avoid losing it
       if (id) {
         try {
-          await courseAPI.update(id, { coverImage: url, coverImageThumb: thumbnailUrl ?? undefined });
+          await courseAPI.update(id, { coverImage: url, coverImageThumb: thumbnailUrl ?? undefined, coverImagePublicId: publicId ?? undefined, coverImageResourceType: resourceType ?? undefined });
           showSuccess('Cover image uploaded and saved to course');
         } catch (err: any) {
           showError('Uploaded, but failed to save cover to course: ' + (err.message || String(err)));
@@ -108,6 +117,41 @@ export default function AdminCourseForm() {
       setTimeout(() => {
         try { URL.revokeObjectURL(objectUrl); } catch (e) { /* ignore */ }
       }, 10000);
+    }
+  };
+
+  const handleRemoveCover = async () => {
+    // quick local clear if nothing to delete
+    if (!form.coverImagePublicId) {
+      setForm((p:any) => ({ ...p, coverImage: '', coverImageThumb: '', coverImagePublicId: '', coverImageResourceType: '' }));
+      setCoverPreview(null);
+      return;
+    }
+
+    // open confirmation modal
+    setShowRemoveDialog(true);
+  };
+
+  const performRemoveCover = async () => {
+    setRemovingCover(true);
+    try {
+      // delete from Cloudinary
+      await uploadsAPI.deleteCloudinary({ publicId: form.coverImagePublicId, resourceType: form.coverImageResourceType || undefined });
+
+      // If editing an existing course, clear DB fields
+      if (id) {
+        await courseAPI.update(id, { coverImage: '', coverImageThumb: '', coverImagePublicId: undefined, coverImageResourceType: undefined });
+      }
+
+      // clear local form state
+      setForm((p:any) => ({ ...p, coverImage: '', coverImageThumb: '', coverImagePublicId: '', coverImageResourceType: '' }));
+      setCoverPreview(null);
+      setShowRemoveDialog(false);
+      showSuccess('Cover image deleted');
+    } catch (err: any) {
+      showError(err?.message || 'Failed to delete cover image');
+    } finally {
+      setRemovingCover(false);
     }
   };
 
@@ -181,6 +225,8 @@ export default function AdminCourseForm() {
         }),
         batchSize: form.batchSize || '',
         mode: form.mode || 'Online',
+        coverImagePublicId: form.coverImagePublicId || undefined,
+        coverImageResourceType: form.coverImageResourceType || undefined,
       };
 
       if (id) {
@@ -235,9 +281,25 @@ export default function AdminCourseForm() {
               <div className="mt-2 text-sm text-gray-400">{uploadingCover ? 'Uploading...' : 'Upload a cover image to show on course pages'}</div>
               {form.coverImage && (
                 <div className="mt-2 flex items-center gap-2">
-                  <button type="button" onClick={() => { setForm((p:any) => ({ ...p, coverImage: '' })); setCoverPreview(null); }} className="px-2 py-1 rounded bg-red-600 text-white text-sm">Remove</button>
+                  <button type="button" onClick={handleRemoveCover} className="px-2 py-1 rounded bg-red-600 text-white text-sm">Remove</button>
                 </div>
               )}
+
+      {/* Confirm remove cover */}
+      <ConfirmDialog
+        open={showRemoveDialog}
+        title="Delete cover image"
+        message="This will remove the cover image from Cloudinary and clear it from this course. This cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={removingCover}
+        onConfirm={performRemoveCover}
+        onCancel={() => setShowRemoveDialog(false)}
+      >
+        {form.coverImagePublicId && (
+          <div className="text-sm text-gray-400">Asset: <code className="text-xs text-gray-300">{form.coverImagePublicId}</code></div>
+        )}
+      </ConfirmDialog>
             </div>
           </div>
         </div>

@@ -199,6 +199,8 @@ export interface Course {
   published?: boolean;
   coverImage?: string;
   coverImageThumb?: string;
+  coverImagePublicId?: string;
+  coverImageResourceType?: string;
   instructor?: string;
   tags?: string[];
   createdBy?: string;
@@ -231,7 +233,12 @@ export const courseAPI = {
 
 // Uploads
 export const uploadsAPI = {
-  uploadCourseImage: (form: FormData) => api.post<{ success: boolean; data: { url: string; thumbnailUrl?: string } }>(`/uploads/courses`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  uploadCourseImage: (form: FormData) => api.post<{ success: boolean; data: { url: string; thumbnailUrl?: string; public_id?: string; resource_type?: string; course?: any } }>(`/uploads/courses`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  // Admin-only: delete a Cloudinary asset by public id
+  deleteCloudinary: (payload: { publicId: string; resourceType?: string }) => api.delete<{ success: boolean; data?: any }>(`/uploads/cloudinary`, { data: payload }),
+  // Avatar uploads (authenticated user)
+  uploadAvatar: (form: FormData) => api.post<{ success: boolean; data: { user?: any; url?: string; public_id?: string; resource_type?: string } }>(`/uploads/avatar`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteAvatar: () => api.delete<{ success: boolean; data?: any }>(`/uploads/avatar`),
 };
 
 // Payments API

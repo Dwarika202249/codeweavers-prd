@@ -219,7 +219,35 @@ export default function LoginPage() {
                 <Link to="/forgot" className="text-sm text-primary-300 hover:underline">Forgot password?</Link>
               </div>
 
-              <motion.button whileTap={{ scale: 0.99 }} whileHover={{ scale: 1.01 }} type="submit" disabled={isSubmitting} className="w-full py-3 rounded-lg bg-linear-to-r from-primary-500 to-accent-500 text-white font-medium shadow-lg">{isSubmitting ? (<span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Signing in...</span>) : ('Sign In')}</motion.button>
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                initial={{ backgroundPosition: '0% 50%' }}
+                whileHover={{ scale: 1.02, y: -2, boxShadow: '0 10px 30px rgba(99,102,241,0.18)', backgroundPosition: '100% 50%' }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="relative w-full py-3 rounded-lg bg-linear-to-r from-primary-500 to-accent-500 text-white font-medium shadow-lg overflow-hidden"
+                style={{ backgroundSize: '200% 100%' }}
+              >
+                <motion.span
+                  className="absolute inset-0 rounded-lg pointer-events-none bg-white/5"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileHover={{ opacity: 0.06, x: 30 }}
+                  transition={{ duration: 0.32 }}
+                />
+
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  'Sign In'
+                )}
+              </motion.button>
 
               <div className="relative mt-4">
                 <div className="absolute inset-0 flex items-center">
