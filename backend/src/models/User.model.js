@@ -63,6 +63,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Terms acceptance
+    termsAccepted: {
+      type: Boolean,
+      default: false,
+    },
+    termsAcceptedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

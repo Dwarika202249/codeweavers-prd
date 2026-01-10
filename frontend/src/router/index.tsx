@@ -16,6 +16,8 @@ const BlogPage = lazy(() => import('../pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('../pages/BlogDetailPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const TermsPage = lazy(() => import('../pages/TermsPage'));
+const PoliciesPage = lazy(() => import('../pages/PrivacyPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 // Dashboard pages
@@ -87,6 +89,14 @@ const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignm
       {
         path: 'register',
         element: <LazyPage><RegisterPage /></LazyPage>,
+      },
+      {
+        path: 'terms',
+        element: <LazyPage><TermsPage /></LazyPage>,
+      },
+      {
+        path: 'policies',
+        element: <LazyPage><PoliciesPage /></LazyPage>,
       },
       {
         path: '*',

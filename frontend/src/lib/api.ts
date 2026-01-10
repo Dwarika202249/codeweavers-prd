@@ -75,6 +75,7 @@ export interface User {
   avatar?: string;
   isEmailVerified?: boolean;
   createdAt?: string;
+  termsAccepted?: boolean;
   // Login streaks (optional, provided by /auth/me)
   currentLoginStreak?: number;
   longestLoginStreak?: number;
@@ -138,7 +139,7 @@ export interface ContactInquiryResponse {
 
 // Auth API
 export const authAPI = {
-  register: (data: { name: string; email: string; password: string }) =>
+  register: (data: { name: string; email: string; password: string; termsAccepted: boolean }) =>
     api.post<AuthResponse>('/auth/register', data),
   
   login: (data: { email: string; password: string }) =>

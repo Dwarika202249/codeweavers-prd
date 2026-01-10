@@ -20,7 +20,7 @@ const googleClient = new OAuth2Client(config.googleClientId);
 router.post(
   '/register',
   asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, termsAccepted } = req.body;
 
     // Validation
     if (!name || !email || !password) {
@@ -31,6 +31,12 @@ router.post(
     if (password.length < 8) {
       res.status(400);
       throw new Error('Password must be at least 8 characters');
+    }
+
+    // Terms acceptance validation
+    if (termsAccepted !== true) {
+      res.status(400);
+      throw new Error('You must accept the Terms & Privacy Policy');
     }
 
     // Check if user already exists
@@ -46,6 +52,8 @@ router.post(
       email: email.toLowerCase(),
       password,
       authProvider: 'email',
+      termsAccepted: true,
+      termsAcceptedAt: new Date(),
     });
 
     // Generate token
@@ -61,6 +69,7 @@ router.post(
           email: user.email,
           role: user.role,
           avatar: user.avatar,
+          termsAccepted: user.termsAccepted,
         },
         token,
       },
@@ -127,6 +136,7 @@ router.post(
           email: user.email,
           role: user.role,
           avatar: user.avatar,
+          termsAccepted: user.termsAccepted,
         },
         token,
       },
@@ -206,6 +216,7 @@ router.post(
             email: user.email,
             role: user.role,
             avatar: user.avatar,
+            termsAccepted: user.termsAccepted,
           },
           token,
         },

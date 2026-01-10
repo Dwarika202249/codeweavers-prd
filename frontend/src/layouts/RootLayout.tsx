@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { SEO } from '../components';
@@ -9,6 +9,11 @@ import { usePageTracking } from '../hooks/usePageTracking';
 export default function RootLayout() {
   // Track page views for analytics
   usePageTracking();
+
+  const location = useLocation();
+  // Hide global chrome (navbar/footer) on auth pages for a focused auth experience
+  const hideChromeFor = ['/login', '/register'];
+  const hideChrome = hideChromeFor.includes(location.pathname);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 text-gray-100">
@@ -22,11 +27,14 @@ export default function RootLayout() {
       >
         Skip to main content
       </a>
-      <Navbar />
+
+      {!hideChrome && <Navbar />}
+
       <main id="main-content" className="flex-1" tabIndex={-1}>
         <Outlet />
       </main>
-      <Footer />
+
+      {!hideChrome && <Footer />}
     </div>
   );
 }

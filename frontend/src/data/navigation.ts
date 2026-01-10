@@ -17,6 +17,8 @@ export const footerLinks = {
     { label: 'Bootcamps', href: '/bootcamps' },
     { label: 'Blog', href: '/blog' },
     { label: 'Contact', href: '/contact' },
+    { label: 'Terms', href: '/terms' },
+    { label: 'Privacy', href: '/policies' },
   ],
   courses: [
     { label: 'MERN Stack', href: '/bootcamps/mern-stack-development' },

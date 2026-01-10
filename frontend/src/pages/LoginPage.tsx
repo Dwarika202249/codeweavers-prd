@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Zap, BarChart2, Shield, Star } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 
@@ -129,128 +129,110 @@ export default function LoginPage() {
         title="Login"
         description="Sign in to your CodeWeavers account to access your courses and track your progress."
       />
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full space-y-8"
-        >
-          {/* Header */}
-          <div className="text-center">
-            <Link to="/" className="inline-block">
-              <h1 className="text-3xl font-bold bg-linear-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                CodeWeavers
-              </h1>
-            </Link>
-            <h2 className="mt-6 text-2xl font-bold text-gray-900 dark:text-white">
-              Welcome back
-            </h2>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Sign in to your account
-            </p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-gray-900 via-gray-950 to-black">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="relative max-w-6xl w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
 
-          {/* Session expired warning */}
-          {sessionExpired && (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 px-4 py-3 rounded-lg">
-              Your session has expired. Please sign in again.
-            </div>
-          )}
+          {/* Left - Marketing / details */}
+          <motion.section initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} className="hidden md:block md:col-span-7 text-gray-100 relative overflow-hidden">
+            {/* subtle grid background */}
+            <svg className="pointer-events-none absolute inset-0 w-full h-full opacity-10 z-0" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M40 0 H0 V40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
 
-          {/* Error message */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
+            <h1 className="text-6xl font-extrabold bg-clip-text text-white mb-5 bg-linear-to-r from-primary-300 to-accent-400">CodeWeavers</h1>
+            <div className="text-lg text-primary-300 font-medium mt-2">Trust-first, cohort-based learning for Tier-2/3 cities</div>
+            <p className="mt-4 text-lg text-gray-300 max-w-xl">A trust-first learning platform tailored to Tier-2/3 cities — cohort-led, mentor-backed, and outcome-driven.</p>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  {...register('email')}
-                  className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
-                  placeholder="you@example.com"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    {...register('password')}
-                    className="mt-1 block w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+            <motion.ul initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }} className="mt-8 space-y-4">
+              <motion.li variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }} className="flex items-start gap-4">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-700/20 text-primary-300"><Zap className="w-5 h-5" /></span>
+                <div>
+                  <div className="font-semibold">Hands-on Bootcamps</div>
+                  <div className="text-sm text-gray-400">Project-first curriculum designed for jobs.</div>
                 </div>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
-                )}
+              </motion.li>
+
+              <motion.li variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }} className="flex items-start gap-4">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-700/20 text-primary-300"><BarChart2 className="w-5 h-5" /></span>
+                <div>
+                  <div className="font-semibold">Performance Analytics</div>
+                  <div className="text-sm text-gray-400">Real-time progress tracking for learners and mentors.</div>
+                </div>
+              </motion.li>
+
+              <motion.li variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }} className="flex items-start gap-4">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-700/20 text-primary-300"><Star className="w-5 h-5" /></span>
+                <div>
+                  <div className="font-semibold">Placement Focus</div>
+                  <div className="text-sm text-gray-400">Cohort-first support to maximise placement chances.</div>
+                </div>
+              </motion.li>
+
+              <motion.li variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }} className="flex items-start gap-4">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-700/20 text-primary-300"><Shield className="w-5 h-5" /></span>
+                <div>
+                  <div className="font-semibold">Secure & Private</div>
+                  <div className="text-sm text-gray-400">Privacy and data protection built-in.</div>
+                </div>
+              </motion.li>
+            </motion.ul>
+
+          </motion.section>
+
+          {/* Right - Auth card */}
+          <motion.aside initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} whileHover={{ scale: 1.01 }} className="md:col-span-5 bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-white/6 relative">
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-white/5 pointer-events-none" />
+            <div className="absolute -inset-1 rounded-2xl bg-linear-to-r from-white/6 to-white/3 blur-3xl opacity-10 animate-pulse pointer-events-none" />
+            <h1 className="text-3xl text-center font-extrabold bg-clip-text text-white mb-5 bg-linear-to-r from-primary-300 to-accent-400">CodeWeavers</h1>
+            <h2 className="text-xl font-bold text-white">Welcome Back!</h2>
+            <p className="text-sm text-gray-300 mt-1">Sign in to continue your learning journey.</p>
+
+            {/* Session & error */}
+            {sessionExpired && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 px-4 py-3 rounded-lg mt-4">Your session has expired. Please sign in again.</div>
+            )}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mt-4">{error}</div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+              <label className="block text-sm text-gray-200">Email Address</label>
+              <div>
+                <input id="email" type="email" autoComplete="email" {...register('email')} className="mt-1 block w-full px-4 py-3 rounded-lg bg-white/5 border border-white/6 text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="you@example.com" />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign in'
-              )}
-            </button>
-          </form>
+              <label className="block text-sm text-gray-200">Password</label>
+              <div className="relative">
+                <input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" {...register('password')} className="mt-1 block w-full px-4 py-3 pr-12 rounded-lg bg-white/5 border border-white/6 text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="••••••••" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-gray-300 hover:text-white" aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+              </div>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">Or continue with</span>
-            </div>
-          </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-gray-300 flex items-center gap-2"><input type="checkbox" className="h-4 w-4 rounded border-white/10 bg-white/5" /> Remember me</label>
+                <Link to="/forgot" className="text-sm text-primary-300 hover:underline">Forgot password?</Link>
+              </div>
 
-          {/* Google Sign-In */}
-          <div id="google-signin-button" className="flex justify-center" />
+              <motion.button whileTap={{ scale: 0.99 }} whileHover={{ scale: 1.01 }} type="submit" disabled={isSubmitting} className="w-full py-3 rounded-lg bg-linear-to-r from-primary-500 to-accent-500 text-white font-medium shadow-lg">{isSubmitting ? (<span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Signing in...</span>) : ('Sign In')}</motion.button>
 
-          {/* Register link */}
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
-              Sign up
-            </Link>
-          </p>
+              <div className="relative mt-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/6" />
+                </div>
+                <div className="relative flex justify-center text-sm text-gray-300"><span className="px-2 bg-[#1f0436]">Or continue with</span></div>
+              </div>
+
+              <div id="google-signin-button" className="flex justify-center mt-4" />
+
+              <p className="text-center text-sm text-gray-300 mt-6">Don't have an account? <Link to="/register" className="font-medium text-primary-300 hover:underline">Create one</Link></p>
+            </form>
+          </motion.aside>
         </motion.div>
       </div>
     </>
