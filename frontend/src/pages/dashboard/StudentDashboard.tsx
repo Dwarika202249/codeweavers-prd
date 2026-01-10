@@ -97,26 +97,43 @@ export default function StudentDashboard() {
           <h3 className="text-sm font-medium text-white">Daily login streak (last 30 days)</h3>
           <div className="text-xs text-gray-400">Longest: <span className="font-semibold text-white ml-1">{user?.longestLoginStreak ?? 0}</span></div>
         </div>
-        <div className="grid grid-cols-7 gap-1">
-          {(() => {
-            const days: string[] = [];
-            const today = new Date();
-            for (let i = 29; i >= 0; i--) {
-              const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-              d.setUTCDate(d.getUTCDate() - i);
-              days.push(d.toISOString().slice(0,10));
-            }
-            const loginSet = new Set(user?.loginDays || []);
-            return days.map((d) => {
-              const logged = loginSet.has(d);
-              return (
-                <div key={d} title={`${d} - ${logged ? 'Logged in' : 'Missed'}`} className={`w-6 h-6 rounded-sm ${logged ? 'bg-green-400' : 'bg-gray-700/30'} flex items-center justify-center`}></div>
-              );
-            });
-          })()}
-        </div>
+        {/* Compact calendar: day number centered, short month label in bottom-right of each cell */}
+        {(() => {
+          const days: string[] = [];
+          const today = new Date();
+          for (let i = 29; i >= 0; i--) {
+            const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+            d.setUTCDate(d.getUTCDate() - i);
+            days.push(d.toISOString().slice(0,10));
+          }
+
+          const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+          return (
+            <div className="grid grid-cols-7 gap-1">
+              {days.map((d) => {
+                const logged = (user?.loginDays || []).includes(d);
+                const dayDt = new Date(d + 'T00:00:00Z');
+                const dayNum = dayDt.getUTCDate();
+                const monthShort = monthNames[dayDt.getUTCMonth()];
+                const monthLabelClass = logged ? 'text-white/80' : 'text-gray-300';
+
+                return (
+                  <div
+                    key={d}
+                    title={`${d} - ${logged ? 'Logged in' : 'Missed'}`}
+                    className={`w-8 h-8 rounded-sm relative flex items-center justify-center ${logged ? 'bg-green-700 text-white' : 'bg-gray-700/30 text-gray-300'}`}
+                  >
+                    <span className="text-xs font-medium">{dayNum}</span>
+                    <span className={`absolute left-1/2 bottom-0 transform -translate-x-1/2 text-[9px] leading-none mb-0.5 ${monthLabelClass}`}>{monthShort}</span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
         <div className="mt-3 text-xs text-gray-400 flex items-center gap-3">
-          <div className="w-4 h-4 bg-green-400 rounded-sm" />
+          <div className="w-4 h-4 bg-green-700 rounded-sm" />
           <span>Logged in</span>
           <div className="w-4 h-4 bg-gray-700/30 rounded-sm ml-4" />
           <span>Missed</span>

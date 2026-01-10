@@ -28,23 +28,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await authAPI.login({ email, password });
-    const { user, token } = response.data.data;
+    const { token } = response.data.data;
     setToken(token);
-    setUser(user);
+    // fetch full profile including login days and streaks
+    try {
+      const me = await authAPI.getMe();
+      setUser(me.data.data.user);
+    } catch (err) {
+      // fallback to basic user if /me fails
+      const basicUser = response.data.data.user;
+      setUser(basicUser);
+    }
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string, termsAccepted: boolean) => {
     const response = await authAPI.register({ name, email, password, termsAccepted });
-    const { user, token } = response.data.data;
+    const { token } = response.data.data;
     setToken(token);
-    setUser(user);
+    // fetch full profile after registering
+    try {
+      const me = await authAPI.getMe();
+      setUser(me.data.data.user);
+    } catch (err) {
+      setUser(response.data.data.user);
+    }
   }, []);
 
   const googleLogin = useCallback(async (credential: string) => {
     const response = await authAPI.googleLogin(credential);
-    const { user, token } = response.data.data;
+    const { token } = response.data.data;
     setToken(token);
-    setUser(user);
+    try {
+      const me = await authAPI.getMe();
+      setUser(me.data.data.user);
+    } catch (err) {
+      setUser(response.data.data.user);
+    }
   }, []);
 
   const logout = useCallback(() => {
