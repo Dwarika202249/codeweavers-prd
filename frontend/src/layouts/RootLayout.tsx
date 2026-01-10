@@ -12,7 +12,7 @@ export default function RootLayout() {
 
   const location = useLocation();
   // Hide global chrome (navbar/footer) on auth pages for a focused auth experience
-  const hideChromeFor = ['/login', '/register'];
+  const hideChromeFor = ['/login', '/register', '/terms', '/policies'];
   const hideChrome = hideChromeFor.includes(location.pathname);
 
   return (
