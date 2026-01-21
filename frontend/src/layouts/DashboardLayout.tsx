@@ -38,7 +38,7 @@ const studentNavItems: NavItem[] = [
 const collegeNavItems: NavItem[] = [
   { label: 'Dashboard', to: '/college', icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: 'Students', to: '/college/students', icon: <Users className="w-5 h-5" /> },
-  { label: 'Notify', to: '/college/notify', icon: <MessageSquare className="w-5 h-5" /> },
+  { label: 'Invites', to: '/college/invites', icon: <MessageSquare className="w-5 h-5" /> },
   { label: 'Reports', to: '/college/reports', icon: <FileText className="w-5 h-5" /> },
   { label: 'Settings', to: '/college/settings', icon: <Settings className="w-5 h-5" /> },
 ];
