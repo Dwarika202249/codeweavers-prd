@@ -45,7 +45,9 @@ export default function LoginPage() {
       return from;
     }
     // Otherwise redirect based on user role
-    return user?.role === 'admin' ? '/admin' : '/dashboard';
+    if (user?.role === 'admin') return '/admin';
+    if (user?.role === 'college_admin') return '/college';
+    return '/dashboard';
   }, [from, user?.role]);
 
   // Redirect if already authenticated
@@ -259,6 +261,7 @@ export default function LoginPage() {
               <div id="google-signin-button" className="flex justify-center mt-4" />
 
               <p className="text-center text-sm text-gray-300 mt-6">Don't have an account? <Link to="/register" className="font-medium text-primary-300 hover:underline">Create one</Link></p>
+              <p className="text-center text-sm text-gray-300 mt-2">Or <Link to="/colleges/signup" className="font-medium text-primary-300 hover:underline">Create College account</Link></p>
             </form>
           </motion.aside>
         </motion.div>

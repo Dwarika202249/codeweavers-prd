@@ -16,12 +16,15 @@ const BlogPage = lazy(() => import('../pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('../pages/BlogDetailPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const InviteSignupPage = lazy(() => import('../pages/InviteSignupPage'));
+const CollegeSignupPage = lazy(() => import('../pages/CollegeSignupPage'));
 const TermsPage = lazy(() => import('../pages/TermsPage'));
 const PoliciesPage = lazy(() => import('../pages/PrivacyPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 // Dashboard pages
 const StudentDashboard = lazy(() => import('../pages/dashboard/StudentDashboard'));
+const CollegeDashboard = lazy(() => import('../pages/dashboard/CollegeDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard'));
 const InquiriesPage = lazy(() => import('../pages/dashboard/InquiriesPage'));
 const MyCoursesPage = lazy(() => import('../pages/dashboard/MyCoursesPage'));
@@ -41,7 +44,11 @@ const AdminCertificatesPage = lazy(() => import('../pages/admin/AdminCertificate
 const AdminCertificateDetailPage = lazy(() => import('../pages/admin/AdminCertificateDetailPage'));
 const AdminCourseForm = lazy(() => import('../pages/admin/AdminCourseForm'));
 const AdminAssignmentsPage = lazy(() => import('../pages/admin/AdminAssignmentsPage'));
-const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignmentDetailPage'));const AdminSettingsPage = lazy(() => import('../pages/admin/AdminSettingsPage'));export const router = createBrowserRouter([
+const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignmentDetailPage'));
+const AdminCollegesPage = lazy(() => import('../pages/admin/AdminCollegesPage'));
+const AdminSettingsPage = lazy(() => import('../pages/admin/AdminSettingsPage'));
+
+export const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
@@ -91,6 +98,14 @@ const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignm
         element: <LazyPage><RegisterPage /></LazyPage>,
       },
       {
+        path: 'invite',
+        element: <LazyPage><InviteSignupPage /></LazyPage>,
+      },
+      {
+        path: 'colleges/signup',
+        element: <LazyPage><CollegeSignupPage /></LazyPage>,
+      },
+      {
         path: 'terms',
         element: <LazyPage><TermsPage /></LazyPage>,
       },
@@ -117,6 +132,7 @@ const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignm
         index: true,
         element: <LazyPage><StudentDashboard /></LazyPage>,
       },
+
       {
         path: 'courses',
         element: <LazyPage><MyCoursesPage /></LazyPage>,
@@ -133,6 +149,22 @@ const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignm
         path: 'settings',
         element: <LazyPage><UserSettingsPage /></LazyPage>,
       },
+    ],
+  },
+  // College Dashboard Routes (Protected - College Admin / TPO)
+  {
+    path: '/college',
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout variant="college" />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <LazyPage><CollegeDashboard /></LazyPage> },
+      { path: 'students', element: <LazyPage><ComingSoonPage title="Students" /></LazyPage> },
+      { path: 'invites', element: <LazyPage><AdminCollegesPage /></LazyPage> },
+      { path: 'reports', element: <LazyPage><ComingSoonPage title="Reports" /></LazyPage> },
+      { path: 'settings', element: <LazyPage><ComingSoonPage title="Settings" /></LazyPage> },
     ],
   },
   // Admin Dashboard Routes (Protected - Admin Only)
@@ -165,6 +197,9 @@ const AdminAssignmentDetailPage = lazy(() => import('../pages/admin/AdminAssignm
       },
       {        path: 'courses',
         element: <LazyPage><CoursesPage /></LazyPage>,
+      },
+      {        path: 'colleges',
+        element: <LazyPage><AdminCollegesPage /></LazyPage>,
       },
       {        path: 'assignments',
         element: <LazyPage><AdminAssignmentsPage /></LazyPage>,

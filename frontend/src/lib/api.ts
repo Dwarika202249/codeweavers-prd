@@ -71,7 +71,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'student' | 'admin' | 'college_admin' | 'tpo';
   avatar?: string;
   isEmailVerified?: boolean;
   createdAt?: string;
@@ -141,7 +141,6 @@ export interface ContactInquiryResponse {
 export const authAPI = {
   register: (data: { name: string; email: string; password: string; termsAccepted: boolean }) =>
     api.post<AuthResponse>('/auth/register', data),
-  
   login: (data: { email: string; password: string }) =>
     api.post<AuthResponse>('/auth/login', data),
   
@@ -158,6 +157,27 @@ export const authAPI = {
     api.put<{ success: boolean; message: string }>('/auth/password', data),
   deleteAccount: (data?: { currentPassword?: string }) =>
     api.delete<{ success: boolean; message: string }>('/auth/account', { data }),
+};
+
+// Invite API - token-based signups for college invites
+export const inviteAPI = {
+  getInvite: (token: string) => api.get<{ success: boolean; data: { invite: any } }>(`/invite/${token}`),
+  signup: (token: string, data: { name: string; email: string; password: string; termsAccepted: boolean; studentMeta?: any }) => api.post<{ success: boolean; data: { user: any; token: string } }>(`/invite/${token}/signup`, data),
+  resend: (token: string, email?: string) => api.post<{ success: boolean; data: { invite: any; emailResult: any } }>(`/invite/${token}/resend`, { email }),
+  revoke: (token: string) => api.post<{ success: boolean; data: { invite: any } }>(`/invite/${token}/revoke`),
+};
+
+export const collegeAdminAPI = {
+  list: (params?: { page?: number; limit?: number; q?: string }) => api.get<{ success: boolean; data: { colleges: any[]; pagination?: any } }>(`/colleges`, { params }),
+  getInvites: (collegeId: string, params?: { page?: number; limit?: number }) => api.get<{ success: boolean; data: { invites: any[]; stats: any; pagination?: any } }>(`/colleges/${collegeId}/invites`, { params }),
+  createInvite: (collegeId: string, payload: { type?: 'student' | 'tpo'; email?: string; expiresInHours?: number }) => api.post<{ success: boolean; data: { token: string; expiresAt: string; inviteUrl?: string; emailResult?: any } }>(`/colleges/${collegeId}/invite`, payload),
+  // Admin verify
+  verify: (collegeId: string, verified: boolean = true) => api.post<{ success: boolean; data: { college: any } }>(`/colleges/${collegeId}/verify`, { verified }),
+};
+
+// Public college endpoints
+export const collegePublicAPI = {
+  signup: (data: { name: string; whiteLabelUrl?: string; customDomain?: string; logo?: string; allowedEmailDomains?: string[]; adminName: string; adminEmail: string; adminPassword: string }) => api.post<{ success: boolean; data: { college: any; admin: any; token: string } }>(`/colleges/signup`, data),
 };
 
 // Contact API

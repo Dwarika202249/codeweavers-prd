@@ -49,7 +49,9 @@ export default function RegisterPage() {
     if (from && from !== '/') {
       return from;
     }
-    return user?.role === 'admin' ? '/admin' : '/dashboard';
+    if (user?.role === 'admin') return '/admin';
+    if (user?.role === 'college_admin') return '/college';
+    return '/dashboard';
   }, [from, user?.role]);
 
   // Redirect if already authenticated
@@ -282,6 +284,7 @@ export default function RegisterPage() {
               <div id="google-signup-button" className="flex justify-center mt-4" />
 
               <p className="text-center text-sm text-gray-300 mt-6">Already have an account? <Link to="/login" className="font-medium text-primary-300 hover:underline">Sign in</Link></p>
+              <p className="text-center text-sm text-gray-300 mt-2">Or <Link to="/colleges/signup" className="font-medium text-primary-300 hover:underline">Create College account</Link></p>
             </form>
 
             

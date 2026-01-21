@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NotificationsProvider } from '../contexts/NotificationContext';
+import PageLoader from '../components/ui/PageLoader';
 import NotificationsBell from '../components/NotificationsBell';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -34,6 +35,14 @@ const studentNavItems: NavItem[] = [
   { label: 'Settings', to: '/dashboard/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
+const collegeNavItems: NavItem[] = [
+  { label: 'Dashboard', to: '/college', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { label: 'Students', to: '/college/students', icon: <Users className="w-5 h-5" /> },
+  { label: 'Notify', to: '/college/notify', icon: <MessageSquare className="w-5 h-5" /> },
+  { label: 'Reports', to: '/college/reports', icon: <FileText className="w-5 h-5" /> },
+  { label: 'Settings', to: '/college/settings', icon: <Settings className="w-5 h-5" /> },
+];
+
 const adminNavItems: NavItem[] = [
   { label: 'Dashboard', to: '/admin', icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: 'Inquiries', to: '/admin/inquiries', icon: <MessageSquare className="w-5 h-5" /> },
@@ -42,13 +51,14 @@ const adminNavItems: NavItem[] = [
   { label: 'Certificates', to: '/admin/certificates', icon: <FileText className="w-5 h-5" /> },
   { label: 'Assignments', to: '/admin/assignments', icon: <FileText className="w-5 h-5" /> },
   { label: 'Courses', to: '/admin/courses', icon: <BookOpen className="w-5 h-5" /> },
+  { label: 'Colleges', to: '/admin/colleges', icon: <Users className="w-5 h-5" /> },
   { label: 'Blog Posts', to: '/admin/blog', icon: <FileText className="w-5 h-5" /> },
   { label: 'Testimonials', to: '/admin/testimonials', icon: <Quote className="w-5 h-5" /> },
   { label: 'Settings', to: '/admin/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
 interface DashboardLayoutProps {
-  variant?: 'student' | 'admin';
+  variant?: 'student' | 'admin' | 'college';
 }
 
 export default function DashboardLayout({ variant = 'student' }: DashboardLayoutProps) {
@@ -56,8 +66,42 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navItems = variant === 'admin' ? adminNavItems : studentNavItems;
-  const dashboardTitle = variant === 'admin' ? 'Admin Panel' : 'Student Dashboard';
+  const navItems = variant === 'admin' ? adminNavItems : (variant === 'college' ? collegeNavItems : studentNavItems);
+  const dashboardTitle = variant === 'admin' ? 'Admin Panel' : (variant === 'college' ? 'College Dashboard' : 'Student Dashboard');
+
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const location = useLocation();
+
+  // Enforce role restrictions via effect (avoid calling navigate during render)
+  useEffect(() => {
+    if (!user) return;
+    if (variant === 'college' && !['college_admin', 'tpo'].includes(user.role)) {
+      // If a non-college admin somehow reached here, redirect them to their dashboard
+      if (location.pathname !== '/dashboard') {
+        setIsRedirecting(true);
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [variant, user, navigate, location.pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (variant === 'student' && ['college_admin', 'tpo'].includes(user.role)) {
+      if (location.pathname !== '/college') {
+        setIsRedirecting(true);
+        navigate('/college', { replace: true });
+      }
+    }
+  }, [variant, user, navigate, location.pathname]);
+
+  // Clear redirecting state when the location actually changes
+  useEffect(() => {
+    if (isRedirecting) {
+      setIsRedirecting(false);
+    }
+  }, [location.pathname]);
+
+  if (isRedirecting) return <PageLoader message="Redirecting..." />;
 
   const handleLogout = () => {
     logout();
@@ -123,11 +167,9 @@ export default function DashboardLayout({ variant = 'student' }: DashboardLayout
           </div>
           <div className="mt-2">
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-              variant === 'admin' 
-                ? 'bg-red-500/20 text-red-400' 
-                : 'bg-indigo-500/20 text-indigo-400'
+              variant === 'admin' ? 'bg-red-500/20 text-red-400' : (variant === 'college' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-indigo-500/20 text-indigo-400')
             }`}>
-              {variant === 'admin' ? 'Admin' : 'Student'}
+              {variant === 'admin' ? 'Admin' : (variant === 'college' ? 'College' : 'Student')}
             </span>
           </div>
         </div>

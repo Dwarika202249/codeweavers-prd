@@ -36,8 +36,21 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'student', 'admin', 'college_admin', 'tpo'],
       default: 'user',
+    },
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'College',
+      default: null,
+      index: true,
+    },
+    studentMeta: {
+      year: { type: String, default: '' },
+      branch: { type: String, default: '' },
+      section: { type: String, default: '' },
+      interests: { type: [String], default: [] },
+      enrolNo: { type: String, default: '' },
     },
     authProvider: {
       type: String,

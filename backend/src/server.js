@@ -31,6 +31,10 @@ app.use(cors({
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
+// Tenant resolution for white-labelled college subdomains / headers
+import resolveTenant from './middleware/tenant.middleware.js';
+app.use(resolveTenant);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -50,6 +54,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
+import collegeRoutes from './routes/college.routes.js';
+import inviteRoutes from './routes/invite.routes.js';
+app.use('/api/colleges', collegeRoutes);
+app.use('/api/invite', inviteRoutes);
 import enrollmentRoutes from './routes/enrollment.routes.js';
 app.use('/api/enrollments', enrollmentRoutes);
 import certificateRoutes from './routes/certificate.routes.js';
