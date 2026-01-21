@@ -4,6 +4,7 @@ import Enrollment from '../models/Enrollment.model.js';
 import slugify from 'slugify';
 import { asyncHandler } from '../middleware/error.middleware.js';
 import { protect, adminOnly } from '../middleware/auth.middleware.js';
+import { getJson, setJson, delKey, delByPattern, incrCounter } from '../services/redis.js';
 
 const router = express.Router();
 
@@ -39,49 +40,84 @@ router.post('/', protect, adminOnly, asyncHandler(async (req, res) => {
 
   const course = await Course.create({ title, slug: slugCandidate, shortDescription, description, duration, level, price, instructor: instructor || '', coverImage: coverImage || '', coverImageThumb: req.body.coverImageThumb || '', coverImagePublicId: req.body.coverImagePublicId || '', coverImageResourceType: req.body.coverImageResourceType || '', prerequisites, learningOutcomes, schedule, batchSize: batchSize || '', mode: mode || 'Online', curriculum: curriculumClean, targetAudience: targetAudienceClean, topics: topicsClean, tags: tagsClean, published, createdBy: req.user.id });
 
+  // Invalidate course list caches and set single course cache
+  try {
+    await delByPattern('courses:list*');
+    await setJson(`course:${course._id}`, course, 60 * 5);
+  } catch (e) { /* ignore */ }
+
   res.status(201).json({ success: true, data: { course } });
 }));
 
-// Get all courses (public)
+// Get all courses (public) with list caching
 router.get('/', asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20, q, level, published } = req.query;
-  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const { page = 1, limit = 20, q = '', level = '', published } = req.query;
+  const p = Number(page) || 1;
+  const l = Number(limit) || 20;
 
-  const filter = {};
-  if (typeof published !== 'undefined') {
-    // accept true/false strings
-    const val = String(published).toLowerCase();
-    if (['true','false','1','0'].includes(val)) filter.published = val === 'true' || val === '1';
-  } else {
-    // by default only show published courses to public
-    filter.published = true;
+  // Normalize query string for key
+  const qNorm = String(q || '').trim().toLowerCase();
+  const levelNorm = String(level || '').trim();
+  const pubVal = typeof published !== 'undefined' ? String(published).toLowerCase() : 'true';
+
+  const key = `courses:list:q=${encodeURIComponent(qNorm)}:p=${p}:l=${l}:level=${encodeURIComponent(levelNorm)}:published=${pubVal}`;
+
+  // Try cache
+  const cached = await getJson(key);
+  if (cached) {
+    // instrumentation
+    try { await incrCounter('cache:hit:courses:list'); } catch (e) { /* ignore */ }
+    return res.json({ success: true, data: cached, cached: true });
   }
 
-  if (level) filter.level = String(level);
+  // Build filter
+  const filter = {};
+  if (pubVal === 'true' || pubVal === '1') filter.published = true;
+  else if (pubVal === 'false' || pubVal === '0') filter.published = false;
 
-  if (q) {
+  if (levelNorm) filter.level = levelNorm;
+
+  if (qNorm) {
     filter.$or = [
-      { title: { $regex: q, $options: 'i' } },
-      { shortDescription: { $regex: q, $options: 'i' } },
-      { description: { $regex: q, $options: 'i' } },
+      { title: { $regex: qNorm, $options: 'i' } },
+      { shortDescription: { $regex: qNorm, $options: 'i' } },
+      { description: { $regex: qNorm, $options: 'i' } },
     ];
   }
 
+  const skip = (p - 1) * l;
+
   const [courses, total] = await Promise.all([
-    Course.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
+    Course.find(filter).sort({ createdAt: -1 }).skip(skip).limit(l),
     Course.countDocuments(filter),
   ]);
 
-  res.json({ success: true, data: { courses, pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / parseInt(limit)) } } });
+  const payload = { courses, pagination: { page: p, limit: l, total, pages: Math.ceil(total / l) } };
+
+  // cache result for short TTL (60s)
+  try { await setJson(key, payload, 60); await incrCounter('cache:miss:courses:list'); } catch (e) { /* ignore cache errors */ }
+
+  res.json({ success: true, data: payload });
 }));
 
-// Get course by id
+// Get course by id (cached)
 router.get('/:id', asyncHandler(async (req, res) => {
+  const key = `course:${req.params.id}`;
+  // Try cache
+  const cached = await getJson(key);
+  if (cached) {
+    return res.json({ success: true, data: { course: cached, cached: true } });
+  }
+
   const course = await Course.findById(req.params.id);
   if (!course) {
     res.status(404);
     throw new Error('Course not found');
   }
+
+  // Cache for 5 minutes
+  try { await setJson(key, course, 60 * 5); } catch (e) { /* ignore cache errors */ }
+
   res.json({ success: true, data: { course } });
 }));
 
@@ -141,6 +177,12 @@ router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
 
   await course.save();
 
+  // Update cache and invalidate lists
+  try {
+    await setJson(`course:${course._id}`, course, 60 * 5);
+    await delByPattern('courses:list*');
+  } catch (e) { /* ignore cache errors */ }
+
   res.json({ success: true, data: { course } });
 }));
 
@@ -153,6 +195,13 @@ router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   }
 
   await course.remove();
+
+  // Invalidate caches
+  try {
+    await delKey(`course:${req.params.id}`);
+    await delByPattern('courses:list*');
+  } catch (e) { /* ignore cache errors */ }
+
   res.json({ success: true, message: 'Course deleted' });
 }));
 

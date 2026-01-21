@@ -185,7 +185,7 @@ export default function LoginPage() {
           </motion.section>
 
           {/* Right - Auth card */}
-          <motion.aside initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} whileHover={{ scale: 1.01 }} className="md:col-span-5 bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-white/6 relative">
+          <motion.aside initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-5 bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-white/6 relative">
             <div className="absolute inset-0 rounded-2xl ring-1 ring-white/5 pointer-events-none" />
             <div className="absolute -inset-1 rounded-2xl bg-linear-to-r from-white/6 to-white/3 blur-3xl opacity-10 animate-pulse pointer-events-none" />
             <h1 className="text-3xl text-center font-extrabold bg-clip-text text-white mb-5 bg-linear-to-r from-primary-300 to-accent-400">CodeWeavers</h1>
@@ -223,7 +223,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isSubmitting}
                 initial={{ backgroundPosition: '0% 50%' }}
-                whileHover={{ scale: 1.02, y: -2, boxShadow: '0 10px 30px rgba(99,102,241,0.18)', backgroundPosition: '100% 50%' }}
+              whileHover={{ scale: 1.02, boxShadow: '0 10px 30px rgba(99,102,241,0.18)', backgroundPosition: '100% 50%' }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 className="relative w-full py-3 rounded-lg bg-linear-to-r from-primary-500 to-accent-500 text-white font-medium shadow-lg overflow-hidden"
@@ -237,12 +237,12 @@ export default function LoginPage() {
                 />
 
                 {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle className="opacity-25 stroke-current" cx="12" cy="12" r="10" strokeWidth="4" />
+                      <path className="opacity-75 fill-current" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Signing in...
+                    <span className="truncate">Signing in...</span>
                   </span>
                 ) : (
                   'Sign In'
